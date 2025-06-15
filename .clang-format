@@ -1,0 +1,16 @@
+BasedOnStyle: LLVM
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+
+BreakBeforeBraces: Attach  # = 1TBS/K&R
+AllowShortIfStatementsOnASingleLine: true
+AllowShortLoopsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: All
+IndentCaseLabels: true
+AlwaysBreakTemplateDeclarations: No
+SpaceBeforeParens: ControlStatements
+
+SortIncludes: false
+ReflowComments: false
+ColumnLimit: 100
