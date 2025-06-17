@@ -1,4 +1,4 @@
-// Every Frame is a Choice
+// Every Frame is a Choice //
 #include "Systems/Input/FSDLInputDaemonWorker.h"
 #include "Data/LogCategories.h"
 #include <sys/socket.h>
@@ -16,7 +16,7 @@ void FSDLInputDaemonWorker::Start() {
   if (bRunning) return;
   bRunning = true;
   WorkerThread = std::thread(&FSDLInputDaemonWorker::Run, this);
-  UE_LOG(InputLog, Log, TEXT("SDLWorker::Start() called, this=%p"), this);
+  UE_LOG(InputLog, Log, TEXT("FSDLInputDaemonWorker::Start() called, this=%p"), this);
 }
 
 void FSDLInputDaemonWorker::Stop() {
@@ -31,12 +31,12 @@ void FSDLInputDaemonWorker::Stop() {
 bool FSDLInputDaemonWorker::Dequeue(SDL_Event &OutEvent) {
   std::unique_lock<std::mutex> Lock(QueueMutex);
   if (EventQueue.empty()) {
-    //UE_LOG(InputLog, Log, TEXT("[Daemon] Dequeue: Queue is empty"));
+    //UE_LOG(InputLog, Log, TEXT("FSDLInputDaemonWorker::Dequeue() Queue is empty"));
     return false;
   }
   OutEvent = EventQueue.front();
   EventQueue.pop();
-  //UE_LOG(InputLog, Log, TEXT("[Daemon] Dequeue: Event type %u dequeued"), OutEvent.type);
+  //UE_LOG(InputLog, Log, TEXT("FSDLInputDaemonWorker::Dequeue() Event type %u dequeued"), OutEvent.type);
   return true;
 }
 
@@ -71,10 +71,12 @@ static bool ReadFull(int fd, void *buffer, size_t size) {
 }
 
 void FSDLInputDaemonWorker::Run() {
-  UE_LOG(InputLog, Log, TEXT("[Daemon] Run() started"));
+  UE_LOG(InputLog, Log, TEXT("FSDLInputDaemonWorker::Run() started"));
 
   if (!ConnectToDaemon()) {
-    UE_LOG(InputLog, Error, TEXT("Failed to connect to SDLInputDaemon at %s"), *SocketPath);
+    UE_LOG(InputLog, Error,
+           TEXT("FSDLInputDaemonWorker::Run() Failed to connect to SDLInputDaemon at %s"),
+           *SocketPath);
     return;
   }
 
@@ -84,7 +86,8 @@ void FSDLInputDaemonWorker::Run() {
 
     if (!ReadFull(SocketFD, &FrameType, sizeof(FrameType)) ||
         !ReadFull(SocketFD, &FrameSize, sizeof(FrameSize))) {
-      UE_LOG(InputLog, Warning, TEXT("Failed to read frame header. Disconnecting."));
+      UE_LOG(InputLog, Warning,
+             TEXT("FSDLInputDaemonWorker::Run() Failed to read frame header. Disconnecting."));
       break;
     }
 
@@ -98,7 +101,8 @@ void FSDLInputDaemonWorker::Run() {
         break;
 
       default:
-        UE_LOG(InputLog, Warning, TEXT("Unknown daemon frame type: %u"), FrameType);
+        UE_LOG(InputLog, Warning,
+               TEXT("FSDLInputDaemonWorker::Run() Unknown daemon frame type: %u"), FrameType);
         break;
     }
   }
@@ -112,13 +116,16 @@ void FSDLInputDaemonWorker::HandleDisconnected(const SDL_Event &Event) {}
 
 void FSDLInputDaemonWorker::HandleSDLEventFrame(uint32_t FrameSize) {
   if (FrameSize != sizeof(SDL_Event)) {
-    UE_LOG(InputLog, Warning, TEXT("Invalid SDL_Event frame size: %u"), FrameSize);
+    UE_LOG(InputLog, Warning,
+           TEXT("FSDLInputDaemonWorker::HandleSDLEventFrame() Invalid SDL_Event frame size: %u"),
+           FrameSize);
     return;
   }
 
   SDL_Event Event;
   if (!ReadFull(SocketFD, &Event, sizeof(Event))) {
-    UE_LOG(InputLog, Warning, TEXT("Failed to read SDL_Event."));
+    UE_LOG(InputLog, Warning,
+           TEXT("FSDLInputDaemonWorker::HandleSDLEventFrame() Failed to read SDL_Event."));
     return;
   }
 
@@ -155,7 +162,7 @@ void FSDLInputDaemonWorker::HandleSDLEventFrame(uint32_t FrameSize) {
     EventQueue.push(Event);
   }
 
-  /*UE_LOG(InputLog, Log, TEXT("[Daemon] Enqueued SDL_Event type: %u (SourceID: %d)"), Event.type,
+  /*UE_LOG(InputLog, Log, TEXT("FSDLInputDaemonWorker::HandleSDLEventFrame() Enqueued SDL_Event type: %u (SourceID: %d)"), Event.type,
          SourceID);*/
 
   DataAvailable.notify_one();
@@ -163,13 +170,18 @@ void FSDLInputDaemonWorker::HandleSDLEventFrame(uint32_t FrameSize) {
 
 void FSDLInputDaemonWorker::HandleJoystickListUpdate(uint32_t FrameSize) {
   if (FrameSize > sizeof(FJoystickListUpdate)) {
-    UE_LOG(InputLog, Warning, TEXT("JoystickListUpdate frame too large: %u"), FrameSize);
+    UE_LOG(
+        InputLog, Warning,
+        TEXT("FSDLInputDaemonWorker::HandleSDLEventFrame() JoystickListUpdate frame too large: %u"),
+        FrameSize);
     return;
   }
 
   FJoystickListUpdate Payload;
   if (!ReadFull(SocketFD, &Payload, FrameSize)) {
-    UE_LOG(InputLog, Warning, TEXT("Failed to read JoystickListUpdate payload."));
+    UE_LOG(InputLog, Warning,
+           TEXT("FSDLInputDaemonWorker::HandleSDLEventFrame() Failed to read JoystickListUpdate "
+                "payload."));
     return;
   }
 

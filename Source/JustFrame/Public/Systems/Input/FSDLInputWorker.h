@@ -1,4 +1,4 @@
-// Every Frame is a Choice
+// Every Frame is a Choice //
 #pragma once
 
 #include <atomic>

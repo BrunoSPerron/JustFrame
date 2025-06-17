@@ -1,17 +1,19 @@
-// Every Frame is a Choice
+// Every Frame is a Choice //
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "GameManagerSubsystem.generated.h"
 
-// Access from anywhere UGameManagerSubsystem* Manager = GetGameInstance()->GetSubsystem<UGameManagerSubsystem>();
-
 class ARollbackCharacter;
 class UInputBufferManager;
 class UInputPollingService;
 class UPlayerSettingsManager;
 class URollbackSimulationManager;
+class UMoveDatabase;
+
+// Access from anywhere
+// GetGameInstance()->GetSubsystem<UGameManagerSubsystem>();
 
 UCLASS()
 class JUSTFRAME_API UGameManagerSubsystem : public UGameInstanceSubsystem {
@@ -21,13 +23,12 @@ public:
   virtual void Initialize(FSubsystemCollectionBase &Collection) override;
   virtual void Deinitialize() override;
 
-  // Public accessors
   UInputBufferManager *GetInputBufferManager() const { return InputBufferManager; }
   UInputPollingService *GetInputPollingService() const { return InputPollingService; }
   UPlayerSettingsManager *GetPlayerSettingsManager() const { return PlayerSettingsManager; }
   URollbackSimulationManager *GetRollbackSimManager() const { return RollbackSimManager; }
+  UMoveDatabase *GetMoveDatabase() const { return MoveDatabase; }
 
-  // Manual initialization entry point
   void SetupManagers(uint8 NumPlayers, const TArray<ARollbackCharacter *> &Characters);
 
 private:
@@ -42,4 +43,7 @@ private:
 
   UPROPERTY()
   URollbackSimulationManager *RollbackSimManager;
+
+  UPROPERTY()
+  UMoveDatabase *MoveDatabase;
 };

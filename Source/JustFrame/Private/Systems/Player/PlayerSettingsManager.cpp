@@ -1,4 +1,4 @@
-// Every Frame is a Choice
+// Every Frame is a Choice //
 #include "Systems/Player/PlayerSettingsManager.h"
 #include <SDL3/SDL.h>
 

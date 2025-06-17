@@ -1,5 +1,6 @@
-// Every Frame is a Choice
+// Every Frame is a Choice //
 #include "Game/GameManagerSubsystem.h"
+#include "Characters/State/MoveDatabase.h"
 #include "Engine/GameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Systems/Input/InputBufferManager.h"
@@ -17,6 +18,7 @@ void UGameManagerSubsystem::Deinitialize() {
   InputPollingService = nullptr;
   PlayerSettingsManager = nullptr;
   RollbackSimManager = nullptr;
+  MoveDatabase = nullptr;
 }
 
 void UGameManagerSubsystem::SetupManagers(uint8 NumPlayers,
@@ -37,5 +39,9 @@ void UGameManagerSubsystem::SetupManagers(uint8 NumPlayers,
   if (!InputPollingService) {
     InputPollingService = NewObject<UInputPollingService>(this);
     InputPollingService->Init(InputBufferManager, PlayerSettingsManager, RollbackSimManager);
+  }
+  if (!MoveDatabase) {
+    MoveDatabase = NewObject<UMoveDatabase>();
+    MoveDatabase->LoadMoves({TEXT("basic")});
   }
 }

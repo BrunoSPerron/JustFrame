@@ -18,14 +18,14 @@ public class JustFrame : ModuleRules {
 
     // Core engine dependencies
     PublicDependencyModuleNames.AddRange(new string[] {
-      "Core", "CoreUObject", "Engine"
+      "Core", "CoreUObject", "Engine", "Json", "JsonUtilities", "OpenSSL"
     });
 
     PrivateDependencyModuleNames.AddRange(new string[] {
-      // Add private modules here
+      // private modules here
     });
 
-    // Add Editor-specific modules when building the editor
+    // Editor-specific modules when building the editor
     if (Target.bBuildEditor) {
       PrivateDependencyModuleNames.AddRange(new string[] {
         "UnrealEd",
