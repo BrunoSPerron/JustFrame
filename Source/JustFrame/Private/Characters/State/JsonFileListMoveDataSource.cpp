@@ -18,56 +18,62 @@ bool FJsonFileListMoveDataSource::LoadSources(const TArray<FString> &Collections
 
   FilePaths.Reset();
   for (const FString &Collection : Collections) {
-    FString Path = FPaths::ProjectDir() / TEXT("ExternalData/Moves") / (Collection + TEXT(".json"));
-    FilePaths.Add(Path);
+    FilePaths.Add(FPaths::ProjectDir() / TEXT("ExternalData/Moves") / (Collection + TEXT(".json")));
   }
 
-  RawMovesJsonArray.Reset();
+  CanonicalPayloadArray.Reset();
   ClaimedSignatureArray.Reset();
+  SourceVersions.Reset();
 
-  RawMovesJsonArray.Reserve(FilePaths.Num());
+  CanonicalPayloadArray.Reserve(FilePaths.Num());
   ClaimedSignatureArray.Reserve(FilePaths.Num());
+  SourceVersions.Reserve(FilePaths.Num());
 
   for (const FString &FilePath : FilePaths) {
     FString FileContents;
     if (!FFileHelper::LoadFileToString(FileContents, *FilePath)) {
       UE_LOG(MoveDBLog, Error, TEXT("Failed to load move data file: %s"), *FilePath);
       bSuccess = false;
-      RawMovesJsonArray.Add(FString());
-      ClaimedSignatureArray.Add(FString());
+      CanonicalPayloadArray.Add(TEXT(""));
+      ClaimedSignatureArray.Add(TEXT(""));
+      SourceVersions.Add(TEXT("invalid"));
       continue;
     }
 
     TSharedPtr<FJsonObject> Root;
-    TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(FileContents);
+    const TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(FileContents);
     if (!FJsonSerializer::Deserialize(Reader, Root) || !Root.IsValid()) {
       UE_LOG(MoveDBLog, Error, TEXT("Invalid JSON in: %s"), *FilePath);
       bSuccess = false;
-      RawMovesJsonArray.Add(FString());
-      ClaimedSignatureArray.Add(FString());
+      CanonicalPayloadArray.Add(TEXT(""));
+      ClaimedSignatureArray.Add(TEXT(""));
+      SourceVersions.Add(TEXT("invalid"));
       continue;
     }
 
-    const TArray<TSharedPtr<FJsonValue>> *MovesArray = nullptr;
-    if (!Root->TryGetArrayField(TEXT("moves"), MovesArray)) {
-      UE_LOG(MoveDBLog, Error, TEXT("Missing 'moves' array in: %s"), *FilePath);
+    const TSharedPtr<FJsonObject> Payload = Root->GetObjectField(TEXT("payload"));
+    if (!Payload.IsValid()) {
+      UE_LOG(MoveDBLog, Error, TEXT("Missing 'payload' object in: %s"), *FilePath);
       bSuccess = false;
-      RawMovesJsonArray.Add(FString());
-      ClaimedSignatureArray.Add(FString());
+      CanonicalPayloadArray.Add(TEXT(""));
+      ClaimedSignatureArray.Add(TEXT(""));
+      SourceVersions.Add(TEXT("invalid"));
       continue;
     }
 
-    FString CanonicalMovesString;
-    TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&CanonicalMovesString);
-    FJsonSerializer::Serialize(MakeShared<FJsonValueArray>(*MovesArray), TEXT(""), Writer);
-    Writer->Close();
+    // Canonical payload string
+    FString CanonicalPayload;
+    {
+      const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&CanonicalPayload);
+      FJsonSerializer::Serialize(Payload.ToSharedRef(), Writer);
+    }
+    CanonicalPayloadArray.Add(CanonicalPayload);
 
-    RawMovesJsonArray.Add(CanonicalMovesString);
-
+    // Extract signature
     FString SignatureString;
     if (!Root->TryGetStringField(TEXT("signature"), SignatureString)) {
       UE_LOG(MoveDBLog, Warning, TEXT("Missing 'signature' field in: %s"), *FilePath);
-      SignatureString = FString();
+      SignatureString = TEXT("");
     }
     ClaimedSignatureArray.Add(SignatureString);
   }
@@ -75,47 +81,9 @@ bool FJsonFileListMoveDataSource::LoadSources(const TArray<FString> &Collections
   return bSuccess;
 }
 
-bool FJsonFileListMoveDataSource::ParseMoves(TArray<FMoveData> &OutMoves) {
-  bool bSuccess = true;
-
-  for (int32 i = 0; i < RawMovesJsonArray.Num(); ++i) {
-    const FString &JsonArrayString = RawMovesJsonArray[i];
-    if (JsonArrayString.IsEmpty()) continue;
-
-    TArray<TSharedPtr<FJsonValue>> MovesArray;
-    TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(JsonArrayString);
-    if (!FJsonSerializer::Deserialize(Reader, MovesArray)) {
-      UE_LOG(MoveDBLog, Warning, TEXT("Failed to parse move array from file index %d"), i);
-      bSuccess = false;
-      continue;
-    }
-
-    for (const TSharedPtr<FJsonValue> &MoveValue : MovesArray) {
-      TSharedPtr<FJsonObject> MoveObject = MoveValue->AsObject();
-      if (!MoveObject.IsValid()) {
-        UE_LOG(MoveDBLog, Warning, TEXT("Invalid move object at file index %d"), i);
-        bSuccess = false;
-        continue;
-      }
-
-      FMoveData Move;
-      if (!FJsonObjectConverter::JsonObjectToUStruct(MoveObject.ToSharedRef(),
-                                                     FMoveData::StaticStruct(), &Move, 0, 0)) {
-        UE_LOG(MoveDBLog, Warning, TEXT("Failed to convert move struct at file index %d"), i);
-        bSuccess = false;
-        continue;
-      }
-
-      OutMoves.Add(Move);
-    }
-  }
-
-  return bSuccess;
-}
-
-FString FJsonFileListMoveDataSource::GetRawMovesSection(int32 FileIndex) const {
-  if (RawMovesJsonArray.IsValidIndex(FileIndex)) {
-    return RawMovesJsonArray[FileIndex];
+FString FJsonFileListMoveDataSource::GetRawPayload(int32 FileIndex) const {
+  if (CanonicalPayloadArray.IsValidIndex(FileIndex)) {
+    return CanonicalPayloadArray[FileIndex];
   }
   return FString();
 }
@@ -125,4 +93,11 @@ FString FJsonFileListMoveDataSource::GetClaimedSignature(int32 FileIndex) const 
     return ClaimedSignatureArray[FileIndex];
   }
   return FString();
+}
+
+FString FJsonFileListMoveDataSource::GetSourceVersion(int32 FileIndex) const {
+  if (SourceVersions.IsValidIndex(FileIndex)) {
+    return SourceVersions[FileIndex];
+  }
+  return TEXT("invalid");
 }

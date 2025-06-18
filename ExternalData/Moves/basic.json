@@ -1,61 +1,65 @@
 {
   "signature": "TODO_aefc1dd...",
-  "moves": [
-    {
-      "MoveID": "SimplePunch",
-      "animation": "Anim_SimplePunch",
-      "StartupFrames": 6,
-      "ActiveFrames": 3,
-      "HitRecoveryFrames": 7,
-      "WhiffRecoveryFrames": 10,
-      "OnBlockAdvantage": -2,
-      "OnHitAdvantage": 2,
-      "ComboLinks": [],
-      "ResultingStance": "Standing",
-      "CounterWindowModifier": 0,
-      "KnockbackPower": 10,
-      "KnockdownPower": 0,
-      "LaunchPower": 0,
-      "MoveTags": 0,
-      "BalancePerFrame": [
-        100, 100, 100, 100, 100, 100,
-        100, 100, 100,
-        100, 100, 100, 100, 100, 100,
-        100, 100, 100, 100
-      ],
-      "TrackingPerFrame": [
-        5, 5, 5, 5, 5, 5,
-        10, 10, 10,
-        5, 5, 5, 5, 5, 5,
-        5, 5, 5, 5
-      ]
-    },
-    {
-      "MoveID": "SimpleHighKick",
-      "animation": "Anim_SimpleHighKick",
-      "StartupFrames": 8,
-      "ActiveFrames": 3,
-      "HitRecoveryFrames": 10,
-      "WhiffRecoveryFrames": 14,
-      "OnBlockAdvantage": -6,
-      "OnHitAdvantage": 1,
-      "ComboLinks": [],
-      "ResultingStance": "Standing",
-      "CounterWindowModifier": -1,
-      "KnockbackPower": 20,
-      "KnockdownPower": 10,
-      "LaunchPower": 5,
-      "MoveTags": 0,
-      "BalancePerFrame": [
-        100, 100, 100, 100, 100, 95, 90, 85,
-        40, 30, 40, 70, 80, 90, 95,
-        95, 95, 95, 95, 95, 95, 95, 95, 95, 95
-      ],
-      "TrackingPerFrame": [
-        5, 5, 5, 5, 5, 5, 5, 10,
-        15, 15, 10, 5, 5, 5, 5,
-        5, 5, 5, 5, 5, 5, 5, 5, 5, 5
-      ]
-    }
-  ]
+  "payload": {
+    "version": "0.0.1",
+    "moves": [
+      {
+        "MoveID": "SimplePunch",
+        "animation": "Anim_SimplePunch",
+        "StartupFrames": 6,
+        "ActiveFrames": 3,
+        "HitRecoveryFrames": 7,
+        "WhiffRecoveryFrames": 10,
+        "OnBlockAdvantage": -2,
+        "OnHitAdvantage": 2,
+        "ComboLinks": [],
+        "ResultingStance": "Standing",
+        "CounterWindowModifier": 0,
+        "KnockbackPower": 10,
+        "KnockdownPower": 0,
+        "LaunchPower": 0,
+        "MoveTags": 0,
+        "BalancePerFrame": [
+          100, 100, 100, 100, 100, 100,
+          100, 100, 100,
+          100, 100, 100, 100, 100, 100,
+          100, 100, 100, 100
+        ],
+        "TrackingPerFrame": [
+          5, 5, 5, 5, 5, 5,
+          10, 10, 10,
+          5, 5, 5, 5, 5, 5,
+          5, 5, 5, 5
+        ]
+      },
+      {
+        "MoveID": "SimpleHighKick",
+        "animation": "Anim_SimpleHighKick",
+        "StartupFrames": 8,
+        "ActiveFrames": 3,
+        "HitRecoveryFrames": 10,
+        "WhiffRecoveryFrames": 14,
+        "OnBlockAdvantage": -6,
+        "OnHitAdvantage": 1,
+        "ComboLinks": [],
+        "ResultingStance": "Standing",
+        "CounterWindowModifier": -1,
+        "KnockbackPower": 20,
+        "KnockdownPower": 10,
+        "LaunchPower": 5,
+        "MoveTags": 0,
+        "BalancePerFrame": [
+          100, 100, 100, 100, 100, 95, 90, 85,
+          40, 30, 40, 70, 80, 90, 95,
+          95, 95, 95, 95, 95, 95, 95, 95, 95, 95
+        ],
+        "TrackingPerFrame": [
+          5, 5, 5, 5, 5, 5, 5, 10,
+          15, 15, 10, 5, 5, 5, 5,
+          5, 5, 5, 5, 5, 5, 5, 5, 5, 5
+        ]
+      }
+    ]
+  }
 }
+

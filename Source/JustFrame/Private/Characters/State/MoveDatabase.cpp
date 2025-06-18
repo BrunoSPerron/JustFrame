@@ -12,10 +12,10 @@ void UMoveDatabase::LoadMoves(const TArray<FString> &Collections) {
   DataSource->LoadSources(Collections);
 
   for (int32 SourceIndex = 0; SourceIndex < DataSource->GetSourceCount(); ++SourceIndex) {
-    const FString RawJSON = DataSource->GetRawMovesSection(SourceIndex);
+    const FString RawPayload = DataSource->GetRawPayload(SourceIndex);
     const FString Signature = DataSource->GetClaimedSignature(SourceIndex);
 
-    if (!FCryptoUtils::VerifySignatureECDSA(MOVE_DATA_PUBLIC_KEY_PEM, RawJSON, Signature)) {
+    if (!FCryptoUtils::VerifySignatureECDSA(MOVE_DATA_PUBLIC_KEY_PEM, RawPayload, Signature)) {
       UE_LOG(MoveDBLog, Warning, TEXT("Signature verification failed for file %d in source: %s"),
              SourceIndex, *DataSource->GetSourceName());
       // TODO -> Something with that
@@ -26,7 +26,7 @@ void UMoveDatabase::LoadMoves(const TArray<FString> &Collections) {
   }
 
   TArray<FMoveData> LoadedMoves;
-  if (!DataSource->ParseMoves(LoadedMoves)) {
+  if (!DataSource->DeserializePayloads(LoadedMoves)) {
     UE_LOG(MoveDBLog, Error, TEXT("Move loading failed from source: %s"),
            *DataSource->GetSourceName());
     return;
@@ -38,7 +38,7 @@ void UMoveDatabase::LoadMoves(const TArray<FString> &Collections) {
   UE_LOG(MoveDBLog, Log, TEXT("Loaded %d moves from %s"), MoveMap.Num(),
          *DataSource->GetSourceName());
 
-  /*const FMoveData *Punch = FindMove("SimplePunch");
+  const FMoveData *Punch = FindMove("SimplePunch");
   TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(*Punch);
   FString PrettyJson;
   TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&PrettyJson, 0);
@@ -47,7 +47,7 @@ void UMoveDatabase::LoadMoves(const TArray<FString> &Collections) {
     TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&PrettyJson, 0);
     FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
     UE_LOG(MoveDBLog, Log, TEXT("Punch:\n%s"), *PrettyJson);
-  }*/
+  }
 }
 
 const FMoveData *UMoveDatabase::FindMove(FName MoveID) const { return MoveMap.Find(MoveID); }

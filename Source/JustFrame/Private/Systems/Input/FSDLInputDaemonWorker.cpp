@@ -143,7 +143,7 @@ void FSDLInputDaemonWorker::HandleSDLEventFrame(uint32_t FrameSize) {
       SourceID = Event.gdevice.which;
       break;
     default:
-      return; // Irrelevant event
+      return;
   }
 
   {
@@ -154,7 +154,7 @@ void FSDLInputDaemonWorker::HandleSDLEventFrame(uint32_t FrameSize) {
     else if (Event.type == SDL_EVENT_GAMEPAD_REMOVED)
       ConnectedJoysticks.erase(SourceID);
 
-    if (!ConnectedJoysticks.contains(SourceID)) return;
+    if (ConnectedJoysticks.find(SourceID) == ConnectedJoysticks.end()) return;
   }
 
   {
