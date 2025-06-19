@@ -90,6 +90,8 @@ void AFightGameMode::ForTestOnly_Autosetup() {
   GameManagerSubsystem->SetupManagers(Characters.Num(), Characters);
 
   if (Characters.Num() == 2) {
+    Characters[0]->SetTarget(Characters[1]);
+    Characters[1]->SetTarget(Characters[0]);
     UWorld *World = GetWorld();
     AFightCameraActor *Cam = World->SpawnActor<AFightCameraActor>(AFightCameraActor::StaticClass());
     Cam->Init(Characters[0], Characters[1]);

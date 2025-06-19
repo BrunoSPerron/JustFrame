@@ -2,7 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Data/Structs_Character.h"
+#include "Data/Structs_Move.h"
 
 class IMoveDataSource {
 public:

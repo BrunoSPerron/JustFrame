@@ -3,7 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Data/Structs_Character.h"
+#include "Data/Structs_Move.h"
 #include "Data/Enums_Character.h"
 #include "MoveInstance.h"
 #include "CharacterStateMachineComponent.generated.h"

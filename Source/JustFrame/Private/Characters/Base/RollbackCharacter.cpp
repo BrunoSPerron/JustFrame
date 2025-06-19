@@ -22,7 +22,6 @@ ARollbackCharacter::ARollbackCharacter() {
   Mesh->SetSimulatePhysics(false);
   Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-  // We're driving movement manually
   SetActorEnableCollision(false);
   bReplicates = false;
 }
@@ -30,7 +29,6 @@ ARollbackCharacter::ARollbackCharacter() {
 void ARollbackCharacter::BeginPlay() {
   Super::BeginPlay();
 
-  // Set initial state based on actor transform
   SimState.Position = GetActorLocation();
   SimState.Velocity = FVector::ZeroVector;
   SimState.Health = MAX_HEALTH;
@@ -43,18 +41,42 @@ void ARollbackCharacter::SimulateFrame(float DeltaTime, const uint16 InputMask) 
 }
 
 void ARollbackCharacter::ApplyInput(const uint16 InputMask, float DeltaTime) {
-  // TODO replace with state machine
-  FVector InputVec = FVector::ZeroVector;
-  if (InputMask & static_cast<uint16>(EInputBit::Right)) InputVec.X += 1.f;
-  if (InputMask & static_cast<uint16>(EInputBit::Left)) InputVec.X -= 1.f;
-  if (InputMask & static_cast<uint16>(EInputBit::Up)) InputVec.Y += 1.f;
-  if (InputMask & static_cast<uint16>(EInputBit::Down)) InputVec.Y -= 1.f;
-  InputVec = InputVec.GetClampedToMaxSize(1.0f);
-  SimState.Velocity = InputVec * 600.f;
+  if (!target) {
+    SimState.Velocity = FVector::ZeroVector;
+    return;
+  }
+
+  // Compute directional vectors
+  const FVector ToTarget = (target->SimState.Position - SimState.Position).GetSafeNormal2D();
+  const FVector RightVec = FVector::CrossProduct(FVector::UpVector, ToTarget);
+
+  // Movement input
+  FVector MoveInput = FVector::ZeroVector;
+  if (InputMask & static_cast<uint16>(EInputBit::Right)) MoveInput += ToTarget; // approach
+  if (InputMask & static_cast<uint16>(EInputBit::Left)) MoveInput -= ToTarget;  // retreat
+  if (InputMask & static_cast<uint16>(EInputBit::Down)) MoveInput += RightVec;  // strafe right
+  if (InputMask & static_cast<uint16>(EInputBit::Up)) MoveInput -= RightVec;    // strafe left
+  MoveInput = MoveInput.GetClampedToMaxSize(1.0f);
+
+  // Apply acceleration toward desired velocity
+  const float MaxSpeed = 600.f;
+  const float Accel = 3000.f; // units/sec^2
+  const FVector DesiredVelocity = MoveInput * MaxSpeed;
+  const FVector VelocityDelta = DesiredVelocity - SimState.Velocity;
+
+  const FVector AccelStep = VelocityDelta.GetClampedToMaxSize(Accel * DeltaTime);
+  SimState.Velocity += AccelStep;
+
+  // Face target
+  const FRotator FaceRot = ToTarget.Rotation();
+  SetActorRotation(FRotator(0.f, FaceRot.Yaw - 90.f, 0.f));
 }
 
 void ARollbackCharacter::UpdateMovement(float DeltaTime) {
   SimState.Position += SimState.Velocity * DeltaTime;
+
+  // damp small velocity (helps prevent jitter when idle)
+  if (SimState.Velocity.SizeSquared() < 1.0f) SimState.Velocity = FVector::ZeroVector;
 }
 
 void ARollbackCharacter::SaveState(TArray<uint8> &OutData) const {
@@ -67,3 +89,7 @@ void ARollbackCharacter::LoadState(const TArray<uint8> &InData) {
   FMemory::Memcpy(&SimState, InData.GetData(), sizeof(FCharacterState));
   SetActorLocation(SimState.Position);
 }
+
+const FCharacterState *ARollbackCharacter::GetSimState() { return &SimState; }
+
+void ARollbackCharacter::SetTarget(ARollbackCharacter *Target) { target = Target; }

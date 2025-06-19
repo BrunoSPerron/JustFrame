@@ -15,7 +15,7 @@ struct FCharacterState {
 
   FVector Position;
   FVector Velocity;
-  uint8_t Health;
+  uint8 Health;
 };
 
 UCLASS()
@@ -29,6 +29,9 @@ public:
   virtual void SimulateFrame(float DeltaTime, const uint16 InputMask);
   void SaveState(TArray<uint8> &OutData) const;
   void LoadState(const TArray<uint8> &InData);
+  void SetTarget(ARollbackCharacter *Target);
+
+  const FCharacterState *GetSimState();
 
   UPROPERTY(VisibleAnywhere)
   UCapsuleComponent *CapsuleComponent;
@@ -40,4 +43,5 @@ protected:
   FCharacterState SimState;
   void ApplyInput(const uint16 InputMask, float DeltaTime);
   void UpdateMovement(float DeltaTime);
+  ARollbackCharacter *target;
 };
