@@ -61,7 +61,6 @@ bool FJsonFileListMoveDataSource::LoadSources(const TArray<FString> &Collections
       continue;
     }
 
-    // Canonical payload string
     FString CanonicalPayload;
     {
       const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&CanonicalPayload);
@@ -69,7 +68,6 @@ bool FJsonFileListMoveDataSource::LoadSources(const TArray<FString> &Collections
     }
     CanonicalPayloadArray.Add(CanonicalPayload);
 
-    // Extract signature
     FString SignatureString;
     if (!Root->TryGetStringField(TEXT("signature"), SignatureString)) {
       UE_LOG(MoveDBLog, Warning, TEXT("Missing 'signature' field in: %s"), *FilePath);

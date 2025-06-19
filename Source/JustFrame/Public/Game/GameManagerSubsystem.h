@@ -33,7 +33,34 @@ public:
 
 private:
   UPROPERTY()
-  UInputBufferManager *InputBufferManager;
+  UInputBufferManager *InputBUCLASS() class JUSTFRAME_API AFightGameMode : public AGameModeBase {
+    GENERATED_BODY()
+
+  public:
+    AFightGameMode();
+
+    virtual void BeginPlay() override;
+
+    UFUNCTION()
+    void PauseSimulation();
+
+    UFUNCTION()
+    void UnpauseSimulation();
+
+    UFUNCTION()
+    void ResetSimulationTimer(float NewRate);
+
+  private:
+    bool TickSimulation(float DeltaTime);
+    void ForTestOnly_Autosetup();
+
+    UGameManagerSubsystem *GameManagerSubsystem;
+
+    FTSTicker::FDelegateHandle TickerHandle;
+    float TickRate = 60.f;
+    bool bSimulationPaused = false;
+  };
+  ufferManager;
 
   UPROPERTY()
   UInputPollingService *InputPollingService;

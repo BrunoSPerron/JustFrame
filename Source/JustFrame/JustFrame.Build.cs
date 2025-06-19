@@ -22,17 +22,13 @@ public class JustFrame : ModuleRules {
     });
 
     PrivateDependencyModuleNames.AddRange(new string[] {
-      // private modules here
+      
     });
 
-    // Editor-specific modules when building the editor
-    if (Target.bBuildEditor) {
+    // Editor-specific modules
+    if (Target.bBuildEditor) 
       PrivateDependencyModuleNames.AddRange(new string[] {
-        "UnrealEd",
-        "EditorSubsystem",
-        "Slate",
-        "SlateCore"
+        "UnrealEd", "EditorSubsystem", "Slate", "SlateCore"
       });
-    }
   }
 }

@@ -46,11 +46,9 @@ void ARollbackCharacter::ApplyInput(const uint16 InputMask, float DeltaTime) {
     return;
   }
 
-  // Compute directional vectors
   const FVector ToTarget = (target->SimState.Position - SimState.Position).GetSafeNormal2D();
   const FVector RightVec = FVector::CrossProduct(FVector::UpVector, ToTarget);
 
-  // Movement input
   FVector MoveInput = FVector::ZeroVector;
   if (InputMask & static_cast<uint16>(EInputBit::Right)) MoveInput += ToTarget; // approach
   if (InputMask & static_cast<uint16>(EInputBit::Left)) MoveInput -= ToTarget;  // retreat
@@ -58,7 +56,6 @@ void ARollbackCharacter::ApplyInput(const uint16 InputMask, float DeltaTime) {
   if (InputMask & static_cast<uint16>(EInputBit::Up)) MoveInput -= RightVec;    // strafe left
   MoveInput = MoveInput.GetClampedToMaxSize(1.0f);
 
-  // Apply acceleration toward desired velocity
   const float MaxSpeed = 600.f;
   const float Accel = 3000.f; // units/sec^2
   const FVector DesiredVelocity = MoveInput * MaxSpeed;
@@ -67,15 +64,14 @@ void ARollbackCharacter::ApplyInput(const uint16 InputMask, float DeltaTime) {
   const FVector AccelStep = VelocityDelta.GetClampedToMaxSize(Accel * DeltaTime);
   SimState.Velocity += AccelStep;
 
-  // Face target
   const FRotator FaceRot = ToTarget.Rotation();
-  SetActorRotation(FRotator(0.f, FaceRot.Yaw - 90.f, 0.f));
+  const FRotator SimRot = FRotator(0.f, FaceRot.Yaw - 90.f, 0.f);
+  SetActorRotation(SimRot);
+  SimState.Rotation = SimRot;
 }
 
 void ARollbackCharacter::UpdateMovement(float DeltaTime) {
   SimState.Position += SimState.Velocity * DeltaTime;
-
-  // damp small velocity (helps prevent jitter when idle)
   if (SimState.Velocity.SizeSquared() < 1.0f) SimState.Velocity = FVector::ZeroVector;
 }
 

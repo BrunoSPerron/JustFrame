@@ -7,13 +7,15 @@
 #include "GameFramework/Pawn.h"
 #include "RollbackCharacter.generated.h"
 
-// Only add Deterministic field. FVector, int32, float, enums, etc.
-// No TArray, FString, pointers, UObjects, etc.
+// Rollback state — update when adding gameplay fields.
+//  Use: FVector, float, int32, enums, etc.
+//  NO: TArray, FString, pointers, UObjects, or anything non-deterministic.
 USTRUCT()
 struct FCharacterState {
   GENERATED_BODY()
 
   FVector Position;
+  FRotator Rotation;
   FVector Velocity;
   uint8 Health;
 };
