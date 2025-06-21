@@ -10,7 +10,7 @@ class UInputBufferManager;
 class UInputPollingService;
 class UPlayerSettingsManager;
 class URollbackSimulationManager;
-class UMoveDatabase;
+class UCharacterDataDatabase;
 
 // Access from anywhere
 // GetGameInstance()->GetSubsystem<UGameManagerSubsystem>();
@@ -27,40 +27,13 @@ public:
   UInputPollingService *GetInputPollingService() const { return InputPollingService; }
   UPlayerSettingsManager *GetPlayerSettingsManager() const { return PlayerSettingsManager; }
   URollbackSimulationManager *GetRollbackSimManager() const { return RollbackSimManager; }
-  UMoveDatabase *GetMoveDatabase() const { return MoveDatabase; }
+  UCharacterDataDatabase *GetCharacterDataDatabase() const { return CharacterDataDatabase; }
 
   void SetupManagers(uint8 NumPlayers, const TArray<ARollbackCharacter *> &Characters);
 
 private:
   UPROPERTY()
-  UInputBufferManager *InputBUCLASS() class JUSTFRAME_API AFightGameMode : public AGameModeBase {
-    GENERATED_BODY()
-
-  public:
-    AFightGameMode();
-
-    virtual void BeginPlay() override;
-
-    UFUNCTION()
-    void PauseSimulation();
-
-    UFUNCTION()
-    void UnpauseSimulation();
-
-    UFUNCTION()
-    void ResetSimulationTimer(float NewRate);
-
-  private:
-    bool TickSimulation(float DeltaTime);
-    void ForTestOnly_Autosetup();
-
-    UGameManagerSubsystem *GameManagerSubsystem;
-
-    FTSTicker::FDelegateHandle TickerHandle;
-    float TickRate = 60.f;
-    bool bSimulationPaused = false;
-  };
-  ufferManager;
+  UInputBufferManager *InputBufferManager;
 
   UPROPERTY()
   UInputPollingService *InputPollingService;
@@ -72,5 +45,5 @@ private:
   URollbackSimulationManager *RollbackSimManager;
 
   UPROPERTY()
-  UMoveDatabase *MoveDatabase;
+  UCharacterDataDatabase *CharacterDataDatabase;
 };

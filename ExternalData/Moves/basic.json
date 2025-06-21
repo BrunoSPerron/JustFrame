@@ -5,7 +5,7 @@
     "moves": [
       {
         "MoveID": "SimplePunch",
-        "animation": "Anim_SimplePunch",
+        "Animation": "Anim_SimplePunch",
         "StartupFrames": 6,
         "ActiveFrames": 3,
         "HitRecoveryFrames": 7,
@@ -34,7 +34,7 @@
       },
       {
         "MoveID": "SimpleHighKick",
-        "animation": "Anim_SimpleHighKick",
+        "Animation": "Anim_SimpleHighKick",
         "StartupFrames": 8,
         "ActiveFrames": 3,
         "HitRecoveryFrames": 10,

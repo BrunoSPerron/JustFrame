@@ -18,6 +18,7 @@ struct FCharacterState {
   FRotator Rotation;
   FVector Velocity;
   uint8 Health;
+  uint8 NeutralStanceIndex;
 };
 
 UCLASS()

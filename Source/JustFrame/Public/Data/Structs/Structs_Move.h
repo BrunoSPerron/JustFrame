@@ -2,7 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Data/Enums_Character.h"
+#include "Data/Structs/Enums_Character.h"
 #include "Structs_Move.generated.h"
 
 USTRUCT()
@@ -57,4 +57,25 @@ struct FMoveData {
   UPROPERTY() uint8 LaunchPower = 0;           // TODO: Vertical force applied (for juggles)
   UPROPERTY() uint8 MoveTags;                  // TODO: Bitmask of EMoveTagBit values
   UPROPERTY() TArray<uint16> TrackingPerFrame; // TODO: Tracking strength for each frame
+};
+
+USTRUCT()
+struct FNeutralStanceData {
+  GENERATED_BODY()
+
+  UPROPERTY() FString Version;  // TODO: Validate version compatibility before using this data
+  UPROPERTY() FString StanceId; // TODO: Use as key when switching stances at runtime
+  UPROPERTY()
+  FString Animation; // TODO: Load corresponding animation set from registry or data table
+  UPROPERTY() TArray<FString> TransitionFX;   // TODO: Trigger these FX when entering this stance
+  UPROPERTY() TArray<FString> AvailableMoves; // TODO: Transition logic
+  UPROPERTY() bool AllowMovement = true;      // TODO: Gate movement input based on this flag
+  UPROPERTY() int32 MaxWalkSpeed = 400; // TODO: Apply to character movement component if allowed
+  UPROPERTY() int32 Acceleration = 800; // TODO: Apply acceleration curve per stance
+  UPROPERTY() float Friction = 6.0f;    // TODO: Replace default ground friction during this stance
+  UPROPERTY() int32 TurnRate = 360;     // TODO: Modify yaw input response curve or clamp turning
+  UPROPERTY() bool CanBlock = true; // TODO: Enable/disable counter/block input while in this stance
+  UPROPERTY() int32 Balance = 100;  // TODO: Use as baseline balance cap or regen rate per stance
+  UPROPERTY() bool IsAirborne = false;
+  UPROPERTY() bool IsCrouching = false;
 };

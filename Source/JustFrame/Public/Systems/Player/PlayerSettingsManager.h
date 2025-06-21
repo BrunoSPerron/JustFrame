@@ -2,7 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Data/Enums_Input.h"
+#include "Data/Structs/Enums_Input.h"
 #include "UObject/NoExportTypes.h"
 #include "InputCoreTypes.h"
 #include <SDL3/SDL.h>

@@ -1,7 +1,7 @@
 // Every Frame is a Choice //
 #include "Characters/Base/RollbackCharacter.h"
 #include "Data/Consts.h"
-#include "Data/Enums_Input.h"
+#include "Data/Structs/Enums_Input.h"
 #include "Engine/Engine.h"
 #include "Serialization/MemoryReader.h"
 #include "Serialization/MemoryWriter.h"
