@@ -2,14 +2,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Characters/Base/RollbackCharacter.h"
 #include "Data/Structs/Structs_Move.h"
 
-/* all stances must self register
+/*  Stances self register using
 #include "Characters/State/Stance/StanceRegistration.h"
-REGISTER_STANCE_INSTANCE(FJumpForwardStance, TEXT("JumpForward"));
- */
-
-class ARollbackCharacter;
+REGISTER_STANCE_INSTANCE(FMyStance, TEXT("JumpForward"));
+*/
 
 class FStanceInstance {
 public:
@@ -31,6 +30,7 @@ public:
   virtual const TArray<FString> &GetAvailableMoves() const { return StanceData.AvailableMoves; }
   virtual const FString &GetStanceId() const { return StanceData.StanceId; }
 
+  const FCharacterState GetTargetSimData() const;
   int32 GetElapsedFrames() const { return ElapsedFrames; }
 
 protected:

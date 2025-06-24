@@ -9,13 +9,10 @@ FNeutralStance8Way::FNeutralStance8Way(ARollbackCharacter *InOwner, const FStanc
     : FStanceInstance(InOwner, InData) {}
 
 void FNeutralStance8Way::ApplyMovementInput(uint16 InputMask, float DeltaTime) {
-  if (!Owner) return;
   FCharacterState *SimState = Owner->GetSimState();
-  if (!SimState) return;
+  const FCharacterState TargetState = GetTargetSimData();
 
-  FCharacterState *TargetState = Owner->GetTarget()->GetSimState();
-
-  const FVector ToTarget = (TargetState->Position - SimState->Position).GetSafeNormal2D();
+  const FVector ToTarget = (TargetState.Position - SimState->Position).GetSafeNormal2D();
   const FVector RightVec = FVector::CrossProduct(FVector::UpVector, ToTarget);
 
   FVector MoveInput = FVector::ZeroVector;
@@ -36,16 +33,32 @@ void FNeutralStance8Way::ApplyMovementInput(uint16 InputMask, float DeltaTime) {
     const FVector VelocityDelta = DesiredVelocity - SimState->Velocity;
     const FVector AccelStep = VelocityDelta.GetClampedToMaxSize(Accel * DeltaTime);
     SimState->Velocity += AccelStep;
+
+    UE_LOG(StanceLog, VeryVerbose,
+           TEXT("FNeutralStance8Way::ApplyMovementInput: [Char %d] Applying input -> MoveDir: "
+                "(%.2f, %.2f), AccelStep: (%.2f, %.2f)"),
+           Owner->GetCharacterIndex(), MoveDir.X, MoveDir.Y, AccelStep.X, AccelStep.Y);
   } else {
     const float Speed = SimState->Velocity.Size();
     const float FrictionDrop = Friction * DeltaTime;
     const float NewSpeed = FMath::Max(Speed - FrictionDrop, 0.f);
     SimState->Velocity = SimState->Velocity.GetSafeNormal() * NewSpeed;
+
+    UE_LOG(StanceLog, VeryVerbose,
+           TEXT("FNeutralStance8Way::ApplyMovementInput: [Char %d] No input -> Friction drop to "
+                "speed %.2f"),
+           Owner->GetCharacterIndex(), NewSpeed);
   }
 
-  if (SimState->Velocity.SizeSquared() > MaxSpeed * MaxSpeed)
+  if (SimState->Velocity.SizeSquared() > MaxSpeed * MaxSpeed) {
     SimState->Velocity = SimState->Velocity.GetClampedToMaxSize(MaxSpeed);
+    UE_LOG(StanceLog, VeryVerbose,
+           TEXT("FNeutralStance8Way::ApplyMovementInput: [Char %d] Velocity clamped to MaxSpeed "
+                "(%.2f)"),
+           Owner->GetCharacterIndex(), MaxSpeed);
+  }
 
+  const FVector PrevPosition = SimState->Position;
   SimState->Position += SimState->Velocity * DeltaTime;
   Owner->SetActorLocation(SimState->Position);
 
@@ -55,6 +68,12 @@ void FNeutralStance8Way::ApplyMovementInput(uint16 InputMask, float DeltaTime) {
                                                    static_cast<float>(StanceData.TurnRate));
   SimState->Rotation = NewRot;
   Owner->SetActorRotation(NewRot);
+
+  UE_LOG(StanceLog, Verbose,
+         TEXT("FNeutralStance8Way::ApplyMovementInput: [Char %d] Position updated (%.2f, %.2f) → "
+              "(%.2f, %.2f), Velocity: (%.2f, %.2f)"),
+         Owner->GetCharacterIndex(), PrevPosition.X, PrevPosition.Y, SimState->Position.X,
+         SimState->Position.Y, SimState->Velocity.X, SimState->Velocity.Y);
 }
 
 REGISTER_STANCE_INSTANCE(FNeutralStance8Way, TEXT("Neutral8Way"));

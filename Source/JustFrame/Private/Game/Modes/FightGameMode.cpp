@@ -26,7 +26,6 @@ void AFightGameMode::BeginPlay() {
 }
 
 void AFightGameMode::PauseSimulation() {
-  // TODO Pause/Unpause GameManagerSubsystem->GetInputPollingService()->THREAD
   bSimulationPaused = true;
   UE_LOG(LogTemp, Log, TEXT("Simulation paused."));
 }
@@ -86,11 +85,16 @@ void AFightGameMode::ForTestOnly_Autosetup() {
     return;
   }
 
+  for (int32 i = 0; i < Characters.Num(); ++i) {
+    check(Characters[i]);
+    Characters[i]->SetCharacterIndex(i);
+  }
+
   GameManagerSubsystem->SetupManagers(Characters.Num(), Characters);
 
   if (Characters.Num() == 2) {
-    Characters[0]->SetTarget(Characters[1]);
-    Characters[1]->SetTarget(Characters[0]);
+    Characters[0]->SetTargetCharacter(Characters[1]);
+    Characters[1]->SetTargetCharacter(Characters[0]);
     UWorld *World = GetWorld();
     AFightCameraActor *Cam = World->SpawnActor<AFightCameraActor>(AFightCameraActor::StaticClass());
     Cam->Init(Characters[0], Characters[1]);

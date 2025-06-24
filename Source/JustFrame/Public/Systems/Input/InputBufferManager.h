@@ -5,10 +5,6 @@
 #include "UObject/NoExportTypes.h"
 #include "InputBufferManager.generated.h"
 
-// TODO:
-// - Support prediction tagging
-// - Marking inputs as “remote”/“local” for rollback
-
 USTRUCT()
 struct FInputFrame {
   GENERATED_BODY()
@@ -28,7 +24,7 @@ public:
   void Reset();
 
   const TArray<uint16> &GetInputsForFrame(uint32 Frame) const;
-  FORCEINLINE uint32 GetMaxFrame() const { return MaxFrame; }
+  int32 GetMaxFrame() const { return MaxFrame; }
 
 private:
   bool bSimStarted = false;

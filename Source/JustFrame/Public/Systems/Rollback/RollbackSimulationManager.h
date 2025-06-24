@@ -24,18 +24,16 @@ public:
   void AdvanceSimulation();
 
   FORCEINLINE uint32 GetCurrentFrame() const { return CurrentFrame; }
+  const FCharacterState GetCharacterStateAtFrame(int32 Frame, uint8 CharacterIndex) const;
 
-  void InjectInput(uint8 PlayerID, uint16 InputMask);
+  void InjectInput(uint8 CharacterIndex, uint16 InputMask);
   void RollbackTo(uint32 Frame);
 
 private:
   TArray<ARollbackCharacter *> Characters;
-  TMap<uint32, FFrameSnapshot> FrameSnapshots;
-
   uint32 CurrentFrame = 0;
+  TMap<uint32, FFrameSnapshot> FrameSnapshots;
+  UInputBufferManager *InputBuffer;
 
   void SaveSnapshot(uint32 Frame);
-
-  UPROPERTY()
-  UInputBufferManager *InputBuffer;
 };

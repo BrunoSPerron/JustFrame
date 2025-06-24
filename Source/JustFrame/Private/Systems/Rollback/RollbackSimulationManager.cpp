@@ -2,17 +2,19 @@
 #include "Systems/Rollback/RollbackSimulationManager.h"
 #include "Characters/Base/RollbackCharacter.h"
 #include "Data/Consts.h"
+#include "Data/LogCategories.h"
 #include "Kismet/GameplayStatics.h"
 
 void URollbackSimulationManager::Init(TArray<ARollbackCharacter *> InCharacters,
                                       UInputBufferManager *InInputBufferManager) {
   Characters = InCharacters;
   InputBuffer = InInputBufferManager;
-  CurrentFrame = 0;
+  SaveSnapshot(0);
+  CurrentFrame = 1;
 }
 
-void URollbackSimulationManager::InjectInput(uint8 PlayerID, uint16 InputMask) {
-  InputBuffer->InjectInput(PlayerID, InputMask, CurrentFrame);
+void URollbackSimulationManager::InjectInput(uint8 CharacterIndex, uint16 InputMask) {
+  InputBuffer->InjectInput(CharacterIndex, InputMask, CurrentFrame);
 }
 
 void URollbackSimulationManager::AdvanceSimulation() {
@@ -22,6 +24,24 @@ void URollbackSimulationManager::AdvanceSimulation() {
 
   SaveSnapshot(CurrentFrame);
   ++CurrentFrame;
+}
+
+const FCharacterState
+URollbackSimulationManager::GetCharacterStateAtFrame(int32 Frame, uint8 CharacterIndex) const {
+  const FFrameSnapshot *Snapshot = FrameSnapshots.Find(Frame);
+  checkf(Snapshot, TEXT("RollbackSim: No snapshot found for frame %d"), Frame);
+
+  checkf(Snapshot->SerializedStates.IsValidIndex(CharacterIndex),
+         TEXT("RollbackSim: Invalid character index %d at frame %d"), CharacterIndex, Frame);
+
+  const TArray<uint8> &Data = Snapshot->SerializedStates[CharacterIndex];
+  checkf(Data.Num() == sizeof(FCharacterState),
+         TEXT("RollbackSim: Serialized state size mismatch (%d bytes) at frame %d, index %d"),
+         Data.Num(), Frame, CharacterIndex);
+
+  FCharacterState State;
+  FMemory::Memcpy(&State, Data.GetData(), sizeof(FCharacterState));
+  return State;
 }
 
 void URollbackSimulationManager::SaveSnapshot(uint32 Frame) {
@@ -49,7 +69,6 @@ void URollbackSimulationManager::RollbackTo(uint32 Frame) {
   CurrentFrame = Frame;
 
   // Re-simulate from rollback point up to present
-  // TODO fix that, the max frame is not the current
   const int32 MaxFrame = InputBuffer->GetMaxFrame();
   while (CurrentFrame < MaxFrame) AdvanceSimulation();
 }

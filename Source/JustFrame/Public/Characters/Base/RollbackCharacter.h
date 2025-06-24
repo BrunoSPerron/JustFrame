@@ -32,12 +32,22 @@ public:
 
   virtual void BeginPlay() override;
   virtual void SimulateFrame(float DeltaTime, const uint16 InputMask);
+
   void SaveState(TArray<uint8> &OutData) const;
   void LoadState(const TArray<uint8> &InData);
-  void SetTarget(ARollbackCharacter *Target);
 
+  int32 GetCharacterIndex() const { return CharacterIndex; }
   FCharacterState *GetSimState() { return &SimState; };
-  ARollbackCharacter *GetTarget() { return target; };
+  int8 GetTargetCharacterIndex() const {
+    checkf(
+        Target,
+        TEXT("ARollbackCharacter::GetTargetCharacterIndex: Target is null (CharacterIndex = %d)."),
+        CharacterIndex);
+    return Target->CharacterIndex;
+  }
+
+  void SetCharacterIndex(int32 InIndex) { CharacterIndex = InIndex; }
+  void SetTargetCharacter(ARollbackCharacter *InTarget);
 
   UPROPERTY(VisibleAnywhere)
   UCapsuleComponent *CapsuleComponent;
@@ -45,9 +55,9 @@ public:
   UPROPERTY(VisibleAnywhere)
   USkeletalMeshComponent *Mesh;
 
-protected:
-  uint Frame;
+private:
+  int8 CharacterIndex = -1;
   FCharacterState SimState;
-  ARollbackCharacter *target;
+  ARollbackCharacter *Target;
   TSharedPtr<FStanceInstance> CurrentStanceInstance;
 };

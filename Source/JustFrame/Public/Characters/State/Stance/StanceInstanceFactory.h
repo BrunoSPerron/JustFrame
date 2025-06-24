@@ -1,10 +1,10 @@
 // Every Frame is a Choice //
 #pragma once
 
+#include "Characters/State/Stance/StanceInstance.h"
 #include "CoreMinimal.h"
-#include "UObject/Object.h"
 #include "Data/Structs/Structs_Move.h"
-#include "Characters/State/Stance/IStanceInstance.h"
+#include "UObject/Object.h"
 #include "StanceInstanceFactory.generated.h"
 
 class ARollbackCharacter;

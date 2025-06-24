@@ -1,6 +1,6 @@
 // Every Frame is a Choice //
 #include "Characters/Base/RollbackCharacter.h"
-#include "Characters/State/Stance/IStanceInstance.h"
+#include "Characters/State/Stance/StanceInstance.h"
 #include "Data/Consts.h"
 #include "Data/LogCategories.h"
 #include "Data/Structs/Enums_Input.h"
@@ -57,6 +57,9 @@ void ARollbackCharacter::BeginPlay() {
 }
 
 void ARollbackCharacter::SimulateFrame(float DeltaTime, const uint16 InputMask) {
+  UE_LOG(CharacterLog, VeryVerbose,
+         TEXT("ARollbackCharacter::SimulateFrame: [Char %d] InputMask = %u"), GetCharacterIndex(),
+         InputMask);
   CurrentStanceInstance->ApplyMovementInput(InputMask, DeltaTime);
 }
 
@@ -76,4 +79,4 @@ void ARollbackCharacter::LoadState(const TArray<uint8> &InData) {
          SimState.Position.X, SimState.Position.Y, SimState.Position.Z);
 }
 
-void ARollbackCharacter::SetTarget(ARollbackCharacter *Target) { target = Target; }
+void ARollbackCharacter::SetTargetCharacter(ARollbackCharacter *InTarget) { Target = InTarget; }
