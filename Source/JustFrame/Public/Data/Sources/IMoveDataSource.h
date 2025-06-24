@@ -12,7 +12,7 @@ public:
   virtual bool LoadStanceSources(const TArray<FString> &Collections) = 0;
 
   bool DeserializeMovePayloads(TArray<FMoveData> &OutMoves);
-  bool DeserializeStancePayloads(TArray<FNeutralStanceData> &OutStances);
+  bool DeserializeStancePayloads(TArray<FStanceData> &OutStances);
 
   // Move-specific accessors
   virtual FString GetMoveSourceName() const = 0;

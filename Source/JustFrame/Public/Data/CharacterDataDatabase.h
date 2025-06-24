@@ -21,8 +21,8 @@ public:
   uint16 GetMoveIndex(FName MoveID) const;
 
   // Stance access
-  const FNeutralStanceData *FindStance(FString StanceId) const;
-  const FNeutralStanceData *FindStanceByIndex(uint16 Index) const;
+  const FStanceData *FindStance(FString StanceId) const;
+  const FStanceData *FindStanceByIndex(uint16 Index) const;
   uint16 GetStanceIndex(FString StanceId) const;
 
 private:
@@ -34,7 +34,7 @@ private:
   TMap<FName, uint16> MoveIdToIndex;
 
   // Stance data
-  TArray<FNeutralStanceData> StanceList;
-  TMap<FString, FNeutralStanceData> StanceMap;
+  TArray<FStanceData> StanceList;
+  TMap<FString, FStanceData> StanceMap;
   TMap<FString, uint16> StanceIdToIndex;
 };

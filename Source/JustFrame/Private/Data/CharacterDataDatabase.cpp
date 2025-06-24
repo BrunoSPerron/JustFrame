@@ -55,14 +55,14 @@ void UCharacterDataDatabase::LoadCharacterData(const TArray<FString> &MoveCollec
     }
   }
 
-  TArray<FNeutralStanceData> LoadedStances;
+  TArray<FStanceData> LoadedStances;
   if (DataSource->DeserializeStancePayloads(LoadedStances)) {
     StanceMap.Empty();
     StanceList.Empty();
     StanceIdToIndex.Empty();
 
     for (int32 i = 0; i < LoadedStances.Num(); ++i) {
-      const FNeutralStanceData &Stance = LoadedStances[i];
+      const FStanceData &Stance = LoadedStances[i];
       StanceMap.Add(Stance.StanceId, Stance);
       StanceIdToIndex.Add(Stance.StanceId, i);
       StanceList.Add(Stance);
@@ -88,11 +88,11 @@ uint16 UCharacterDataDatabase::GetMoveIndex(FName MoveID) const {
 }
 
 // Stance
-const FNeutralStanceData *UCharacterDataDatabase::FindStance(FString StanceId) const {
+const FStanceData *UCharacterDataDatabase::FindStance(FString StanceId) const {
   return StanceMap.Find(StanceId);
 }
 
-const FNeutralStanceData *UCharacterDataDatabase::FindStanceByIndex(uint16 Index) const {
+const FStanceData *UCharacterDataDatabase::FindStanceByIndex(uint16 Index) const {
   return StanceList.IsValidIndex(Index) ? &StanceList[Index] : nullptr;
 }
 
@@ -100,17 +100,3 @@ uint16 UCharacterDataDatabase::GetStanceIndex(FString StanceId) const {
   const uint16 *Index = StanceIdToIndex.Find(StanceId);
   return Index ? *Index : INDEX_NONE;
 }
-
-/*
-  // Log a whole move
-  const FMoveData *Punch = FindMove("SimplePunch");
-  TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(*Punch);
-  FString PrettyJson;
-  TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&PrettyJson, 0);
-  if (JsonObject.IsValid()) {
-    FString PrettyJson;
-    TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&PrettyJson, 0);
-    FJsonSerializer::Serialize(JsonObject.ToSharedRef(), Writer);
-    UE_LOG(MoveDBLog, Log, TEXT("Punch:\n%s"), *PrettyJson);
-  }
-*/

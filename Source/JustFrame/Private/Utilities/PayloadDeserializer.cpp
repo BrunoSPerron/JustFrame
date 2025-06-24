@@ -74,9 +74,9 @@ bool FMovePayloadDeserializer::DeserializeStanceFromPayload(const FString &Canon
       continue;
     }
 
-    FNeutralStanceData ParsedStance;
+    FStanceData ParsedStance;
     if (!FJsonObjectConverter::JsonObjectToUStruct(
-            Object.ToSharedRef(), FNeutralStanceData::StaticStruct(), &ParsedStance, 0, 0)) {
+            Object.ToSharedRef(), FStanceData::StaticStruct(), &ParsedStance, 0, 0)) {
       UE_LOG(MoveDBLog, Warning, TEXT("Failed to parse stance entry to struct"));
       continue;
     }

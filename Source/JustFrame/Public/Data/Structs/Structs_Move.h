@@ -10,72 +10,79 @@ struct FInputCondition {
   GENERATED_BODY()
 
   UPROPERTY()
-  TArray<uint16> Input; // TODO: Sequence of EInputBit codes required to trigger this condition
+  TArray<uint16> Input;
   UPROPERTY()
-  bool bAllowBuffer = true; // TODO: If true, this input can be buffered ahead of the combo window
+  bool bAllowBuffer = true;
 };
 
 USTRUCT()
 struct FComboLink {
   GENERATED_BODY()
 
-  UPROPERTY() FInputCondition InputCondition; // Input requirement for this combo branch
-  UPROPERTY() FName MoveID;                   // Move to chain into if condition is met
-  UPROPERTY() int32 WindowStart = 0; // TODO: First valid frame (relative to parent move start)
-  UPROPERTY() int32 WindowEnd = 0;   // TODO: Last valid frame to perform this link
-  UPROPERTY() int8 BufferInput = 0;  // TODO: Max number of frames early the input can be buffered
-  UPROPERTY() int8 ChainFrameOffset = 0; // TODO: Offset to delay or blend into the chained move
+  UPROPERTY() FInputCondition InputCondition;
+  UPROPERTY() FName MoveID;
+  UPROPERTY() int32 WindowStart = 0;
+  UPROPERTY() int32 WindowEnd = 0;
+  UPROPERTY() int8 BufferInput = 0;
+  UPROPERTY() int8 ChainFrameOffset = 0;
   UPROPERTY()
-  bool bRequireHitConfirm = false; // TODO: Only allow link if current move hit the opponent
+  bool bRequireHitConfirm = false;
 };
 
 USTRUCT()
 struct FMoveData {
   GENERATED_BODY()
 
-  UPROPERTY() FName MoveID;            // Unique identifier for the move
-  UPROPERTY() FName animation;         // TODO: Reference to animation asset
-  UPROPERTY() uint8 StartupFrames = 0; // TODO: Number of frames before the move becomes active
-  UPROPERTY() int32 ActiveFrames = 0;  // TODO: Duration (in frames) where the move can hit
-  UPROPERTY()
-  int8 HitRecoveryFrames = 0; // TODO: Frames after active window before returning to neutral
-  UPROPERTY()
-  int8 WhiffRecoveryFrames = 0; // TODO: Frames after active window before returning to neutral
-  UPROPERTY() int8 OnBlockAdvantage = 0; // TODO: Frame advantage/disadvantage when blocked
-  UPROPERTY() int8 OnHitAdvantage = 0;   // TODO: Frame advantage/disadvantage when hit connects
-  UPROPERTY()
-  TArray<FComboLink> ComboLinks; // TODO: Links to other moves if input conditions are met
-  UPROPERTY()
-  EStanceState ResultingStance =
-      EStanceState::Standing; // TODO: Stance to enter after the move ends
+  UPROPERTY() FName MoveID;
+  UPROPERTY() FName animation;
+  UPROPERTY() uint8 StartupFrames = 0;
+  UPROPERTY() int32 ActiveFrames = 0;
+  UPROPERTY() int8 HitRecoveryFrames = 0;
+  UPROPERTY() int8 WhiffRecoveryFrames = 0;
+  UPROPERTY() int8 OnBlockAdvantage = 0;
+  UPROPERTY() int8 OnHitAdvantage = 0;
+  UPROPERTY() TArray<FComboLink> ComboLinks;
+  UPROPERTY() EStanceState ResultingStance = EStanceState::Standing;
 
-  UPROPERTY() TArray<uint8> BalancePerFrame; // TODO: Balance value for each frame
-  UPROPERTY()
-  int8 CounterWindowModifier = 0; // TODO: Modifies the timing of the counter window during the move
-  UPROPERTY() uint8 KnockbackPower = 0;        // TODO: Horizontal pushback on hit
-  UPROPERTY() uint8 KnockdownPower = 0;        // TODO: Likelihood of causing knockdown
-  UPROPERTY() uint8 LaunchPower = 0;           // TODO: Vertical force applied (for juggles)
-  UPROPERTY() uint8 MoveTags;                  // TODO: Bitmask of EMoveTagBit values
-  UPROPERTY() TArray<uint16> TrackingPerFrame; // TODO: Tracking strength for each frame
+  UPROPERTY() TArray<uint8> BalancePerFrame;
+  UPROPERTY() int8 CounterWindowModifier = 0;
+  UPROPERTY() uint8 KnockbackPower = 0;
+  UPROPERTY() uint8 KnockdownPower = 0;
+  UPROPERTY() uint8 LaunchPower = 0;
+  UPROPERTY() uint8 MoveTags; // Bitmask of EMoveTagBit values
+  UPROPERTY() TArray<uint16> TrackingPerFrame;
 };
 
 USTRUCT()
-struct FNeutralStanceData {
+struct FStanceData {
   GENERATED_BODY()
 
-  UPROPERTY() FString Version;  // TODO: Validate version compatibility before using this data
-  UPROPERTY() FString StanceId; // TODO: Use as key when switching stances at runtime
-  UPROPERTY()
-  FString Animation; // TODO: Load corresponding animation set from registry or data table
-  UPROPERTY() TArray<FString> TransitionFX;   // TODO: Trigger these FX when entering this stance
-  UPROPERTY() TArray<FString> AvailableMoves; // TODO: Transition logic
-  UPROPERTY() bool AllowMovement = true;      // TODO: Gate movement input based on this flag
-  UPROPERTY() int32 MaxWalkSpeed = 400; // TODO: Apply to character movement component if allowed
-  UPROPERTY() int32 Acceleration = 800; // TODO: Apply acceleration curve per stance
-  UPROPERTY() float Friction = 6.0f;    // TODO: Replace default ground friction during this stance
-  UPROPERTY() int32 TurnRate = 360;     // TODO: Modify yaw input response curve or clamp turning
-  UPROPERTY() bool CanBlock = true; // TODO: Enable/disable counter/block input while in this stance
-  UPROPERTY() int32 Balance = 100;  // TODO: Use as baseline balance cap or regen rate per stance
+  UPROPERTY() FString Version;
+  UPROPERTY() FString StanceId;
+  UPROPERTY() FString AnimationSetId;
+  UPROPERTY() FString StanceType;
+  UPROPERTY() TArray<FString> TransitionFX;
+  UPROPERTY() TArray<FString> AvailableMoves;
+  UPROPERTY() bool AllowMovement = true;
+  UPROPERTY() float MaxWalkSpeed = 400.0f;
+  UPROPERTY() float Acceleration = 800.0f;
+  UPROPERTY() float Friction = 6.0f;
+  UPROPERTY() float TurnRate = 360.0f;
+  UPROPERTY() bool CanBlock = true;
+  UPROPERTY() float Balance = 100.0f;
   UPROPERTY() bool IsAirborne = false;
   UPROPERTY() bool IsCrouching = false;
+};
+
+USTRUCT()
+struct FAnimationSet8Way {
+  GENERATED_BODY()
+
+  UPROPERTY() FString Idle;
+  UPROPERTY() FString WalkForward;
+  UPROPERTY() FString WalkBackward;
+  UPROPERTY() FString WalkLeft;
+  UPROPERTY() FString WalkRight;
+  UPROPERTY() FString TurnLeft;
+  UPROPERTY() FString TurnRight;
 };

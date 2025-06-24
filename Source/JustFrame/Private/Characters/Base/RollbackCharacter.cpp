@@ -1,6 +1,8 @@
 // Every Frame is a Choice //
 #include "Characters/Base/RollbackCharacter.h"
+#include "Characters/State/Stance/IStanceInstance.h"
 #include "Data/Consts.h"
+#include "Data/LogCategories.h"
 #include "Data/Structs/Enums_Input.h"
 #include "Engine/Engine.h"
 #include "Serialization/MemoryReader.h"
@@ -24,68 +26,54 @@ ARollbackCharacter::ARollbackCharacter() {
 
   SetActorEnableCollision(false);
   bReplicates = false;
+
+  SimState.Position = FVector::ZeroVector;
+  SimState.Velocity = FVector::ZeroVector;
+  SimState.Rotation = FRotator::ZeroRotator;
+  SimState.Health = MAX_HEALTH;
 }
 
+//Temporary includes
+#include "Characters/State/Stance/StanceInstanceFactory.h"
+#include "Characters/State/Stance/NeutralStance8Way.h"
 void ARollbackCharacter::BeginPlay() {
   Super::BeginPlay();
 
+  // TEMP: Default stance setup until real data connection
+  FStanceData DefaultStance;
+  DefaultStance.StanceId = TEXT("Neutral8Way");
+  DefaultStance.AllowMovement = true;
+  DefaultStance.MaxWalkSpeed = 400.0f;
+  DefaultStance.Acceleration = 1300.0f;
+  DefaultStance.Friction = 900.0f;
+  DefaultStance.TurnRate = 360.0f;
+  CurrentStanceInstance = UStanceInstanceFactory::Create(this, DefaultStance);
+  //END TEMP
+
   SimState.Position = GetActorLocation();
+  SimState.Rotation = GetActorRotation();
   SimState.Velocity = FVector::ZeroVector;
   SimState.Health = MAX_HEALTH;
 }
 
 void ARollbackCharacter::SimulateFrame(float DeltaTime, const uint16 InputMask) {
-  ApplyInput(InputMask, DeltaTime);
-  UpdateMovement(DeltaTime);
-  SetActorLocation(SimState.Position);
-}
-
-void ARollbackCharacter::ApplyInput(const uint16 InputMask, float DeltaTime) {
-  if (!target) {
-    SimState.Velocity = FVector::ZeroVector;
-    return;
-  }
-
-  const FVector ToTarget = (target->SimState.Position - SimState.Position).GetSafeNormal2D();
-  const FVector RightVec = FVector::CrossProduct(FVector::UpVector, ToTarget);
-
-  FVector MoveInput = FVector::ZeroVector;
-  if (InputMask & static_cast<uint16>(EInputBit::Right)) MoveInput += ToTarget; // approach
-  if (InputMask & static_cast<uint16>(EInputBit::Left)) MoveInput -= ToTarget;  // retreat
-  if (InputMask & static_cast<uint16>(EInputBit::Down)) MoveInput += RightVec;  // strafe right
-  if (InputMask & static_cast<uint16>(EInputBit::Up)) MoveInput -= RightVec;    // strafe left
-  MoveInput = MoveInput.GetClampedToMaxSize(1.0f);
-
-  const float MaxSpeed = 600.f;
-  const float Accel = 3000.f; // units/sec^2
-  const FVector DesiredVelocity = MoveInput * MaxSpeed;
-  const FVector VelocityDelta = DesiredVelocity - SimState.Velocity;
-
-  const FVector AccelStep = VelocityDelta.GetClampedToMaxSize(Accel * DeltaTime);
-  SimState.Velocity += AccelStep;
-
-  const FRotator FaceRot = ToTarget.Rotation();
-  const FRotator SimRot = FRotator(0.f, FaceRot.Yaw - 90.f, 0.f);
-  SetActorRotation(SimRot);
-  SimState.Rotation = SimRot;
-}
-
-void ARollbackCharacter::UpdateMovement(float DeltaTime) {
-  SimState.Position += SimState.Velocity * DeltaTime;
-  if (SimState.Velocity.SizeSquared() < 1.0f) SimState.Velocity = FVector::ZeroVector;
+  CurrentStanceInstance->ApplyMovementInput(InputMask, DeltaTime);
 }
 
 void ARollbackCharacter::SaveState(TArray<uint8> &OutData) const {
   OutData.SetNumUninitialized(sizeof(FCharacterState));
   FMemory::Memcpy(OutData.GetData(), &SimState, sizeof(FCharacterState));
+  UE_LOG(CharacterLog, Verbose, TEXT("SaveState: Saved %d bytes for character %s"), OutData.Num(),
+         *GetName());
 }
 
 void ARollbackCharacter::LoadState(const TArray<uint8> &InData) {
   check(InData.Num() == sizeof(FCharacterState));
   FMemory::Memcpy(&SimState, InData.GetData(), sizeof(FCharacterState));
   SetActorLocation(SimState.Position);
+  UE_LOG(CharacterLog, Verbose,
+         TEXT("LoadState: Loaded state for character %s, Position=(%.2f, %.2f, %.2f)"), *GetName(),
+         SimState.Position.X, SimState.Position.Y, SimState.Position.Z);
 }
-
-const FCharacterState *ARollbackCharacter::GetSimState() { return &SimState; }
 
 void ARollbackCharacter::SetTarget(ARollbackCharacter *Target) { target = Target; }

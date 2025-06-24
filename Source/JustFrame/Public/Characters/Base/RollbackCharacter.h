@@ -7,6 +7,8 @@
 #include "GameFramework/Pawn.h"
 #include "RollbackCharacter.generated.h"
 
+class FStanceInstance;
+
 // Rollback state — update when adding gameplay fields.
 //  Use: FVector, float, int32, enums, etc.
 //  NO: TArray, FString, pointers, UObjects, or anything non-deterministic.
@@ -34,7 +36,8 @@ public:
   void LoadState(const TArray<uint8> &InData);
   void SetTarget(ARollbackCharacter *Target);
 
-  const FCharacterState *GetSimState();
+  FCharacterState *GetSimState() { return &SimState; };
+  ARollbackCharacter *GetTarget() { return target; };
 
   UPROPERTY(VisibleAnywhere)
   UCapsuleComponent *CapsuleComponent;
@@ -43,8 +46,8 @@ public:
   USkeletalMeshComponent *Mesh;
 
 protected:
+  uint Frame;
   FCharacterState SimState;
-  void ApplyInput(const uint16 InputMask, float DeltaTime);
-  void UpdateMovement(float DeltaTime);
   ARollbackCharacter *target;
+  TSharedPtr<FStanceInstance> CurrentStanceInstance;
 };

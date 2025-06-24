@@ -28,7 +28,7 @@ bool IMoveDataSource::DeserializeMovePayloads(TArray<FMoveData> &OutMoves) {
   return bSuccess;
 }
 
-bool IMoveDataSource::DeserializeStancePayloads(TArray<FNeutralStanceData> &OutStances) {
+bool IMoveDataSource::DeserializeStancePayloads(TArray<FStanceData> &OutStances) {
   bool bSuccess = true;
 
   for (int32 i = 0; i < CanonicalStancePayloadArray.Num(); ++i) {

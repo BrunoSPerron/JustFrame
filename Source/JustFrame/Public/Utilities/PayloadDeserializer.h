@@ -12,7 +12,7 @@ struct FDeserializedMovePayload {
 
 struct FDeserializedStancePayload {
   FString Version;
-  TArray<FNeutralStanceData> Stances;
+  TArray<FStanceData> Stances;
 };
 
 class FMovePayloadDeserializer {

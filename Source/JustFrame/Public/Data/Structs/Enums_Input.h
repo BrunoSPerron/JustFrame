@@ -1,7 +1,7 @@
 // Every Frame is a Choice //
 #pragma once
 
-enum class EInputBit : uint16_t {
+enum class EInputBit : uint16 {
   Up = 1 << 0,
   Down = 1 << 1,
   Left = 1 << 2,
