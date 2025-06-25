@@ -9,31 +9,26 @@
 #include "JsonObjectConverter.h"
 #include "Data/LogCategories.h"
 
-FString FJsonFileListMoveDataSource::GetMoveSourceName() const {
-  return FString::Printf(TEXT("JSONFileList:Moves[%d files]"), CanonicalMovePayloadArray.Num());
-}
-
-FString FJsonFileListMoveDataSource::GetStanceSourceName() const {
-  return FString::Printf(TEXT("JSONFileList:Stances[%d files]"), CanonicalStancePayloadArray.Num());
-}
-
-bool FJsonFileListMoveDataSource::LoadMoveSources(const TArray<FString> &Collections) {
+bool FJsonFileListMoveDataSource::LoadCharacterSources(const TArray<FString> &Collections) {
   bool bSuccess = true;
 
-  MoveFilePaths.Reset();
+  CharacterFilePaths.Reset();
   for (const FString &Collection : Collections) {
-    MoveFilePaths.Add(FPaths::ProjectDir() / TEXT("ExternalData/Moves") /
-                      (Collection + TEXT(".json")));
+    CharacterFilePaths.Add(FPaths::ProjectDir() / TEXT("ExternalData/Characters") /
+                           (Collection + TEXT(".json")));
   }
 
-  CanonicalMovePayloadArray.Reset();
-  ClaimedMoveSignatureArray.Reset();
-  MoveSourceVersions.Reset();
+  CanonicalCharacterPayloadArray.Reset();
+  ClaimedCharacterSignatureArray.Reset();
+  CharacterSourceVersions.Reset();
 
-  for (const FString &FilePath : MoveFilePaths) {
+  for (const FString &FilePath : CharacterFilePaths) {
     FString FileContents;
     if (!FFileHelper::LoadFileToString(FileContents, *FilePath)) {
-      UE_LOG(MoveDBLog, Error, TEXT("Failed to load move data file: %s"), *FilePath);
+      UE_LOG(MoveDBLog, Error, TEXT("Failed to load character data file: %s"), *FilePath);
+      CanonicalCharacterPayloadArray.Add(TEXT(""));
+      ClaimedCharacterSignatureArray.Add(TEXT(""));
+      CharacterSourceVersions.Add(TEXT("invalid"));
       bSuccess = false;
       continue;
     }
@@ -41,14 +36,21 @@ bool FJsonFileListMoveDataSource::LoadMoveSources(const TArray<FString> &Collect
     TSharedPtr<FJsonObject> Root;
     const TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(FileContents);
     if (!FJsonSerializer::Deserialize(Reader, Root) || !Root.IsValid()) {
-      UE_LOG(MoveDBLog, Error, TEXT("Invalid JSON in: %s"), *FilePath);
+      UE_LOG(MoveDBLog, Error, TEXT("Invalid JSON in character file: %s"), *FilePath);
+      CanonicalCharacterPayloadArray.Add(TEXT(""));
+      ClaimedCharacterSignatureArray.Add(TEXT(""));
+      CharacterSourceVersions.Add(TEXT("invalid"));
       bSuccess = false;
       continue;
     }
 
     const TSharedPtr<FJsonObject> Payload = Root->GetObjectField(TEXT("payload"));
-    if (!Payload.IsValid() || !Payload->HasField(TEXT("moves"))) {
-      UE_LOG(MoveDBLog, Warning, TEXT("File does not contain move payload: %s"), *FilePath);
+    if (!Payload.IsValid()) {
+      UE_LOG(MoveDBLog, Error, TEXT("Missing 'payload' in character file: %s"), *FilePath);
+      CanonicalCharacterPayloadArray.Add(TEXT(""));
+      ClaimedCharacterSignatureArray.Add(TEXT(""));
+      CharacterSourceVersions.Add(TEXT("invalid"));
+      bSuccess = false;
       continue;
     }
 
@@ -58,110 +60,46 @@ bool FJsonFileListMoveDataSource::LoadMoveSources(const TArray<FString> &Collect
       FJsonSerializer::Serialize(Payload.ToSharedRef(), Writer);
     }
 
-    CanonicalMovePayloadArray.Add(CanonicalPayload);
-
-    FString SignatureString;
-    Root->TryGetStringField(TEXT("signature"), SignatureString);
-    ClaimedMoveSignatureArray.Add(SignatureString);
-  }
-  return bSuccess;
-}
-
-bool FJsonFileListMoveDataSource::LoadStanceSources(const TArray<FString> &Collections) {
-  bool bSuccess = true;
-
-  StanceFilePaths.Reset();
-  for (const FString &Collection : Collections) {
-    StanceFilePaths.Add(FPaths::ProjectDir() / TEXT("ExternalData/Stances") /
-                        (Collection + TEXT(".json")));
-  }
-
-  CanonicalStancePayloadArray.Reset();
-  ClaimedStanceSignatureArray.Reset();
-  StanceSourceVersions.Reset();
-
-  CanonicalStancePayloadArray.Reserve(StanceFilePaths.Num());
-  ClaimedStanceSignatureArray.Reserve(StanceFilePaths.Num());
-  StanceSourceVersions.Reserve(StanceFilePaths.Num());
-
-  for (const FString &FilePath : StanceFilePaths) {
-    FString FileContents;
-    if (!FFileHelper::LoadFileToString(FileContents, *FilePath)) {
-      UE_LOG(MoveDBLog, Error, TEXT("Failed to load stance data file: %s"), *FilePath);
-      CanonicalStancePayloadArray.Add(TEXT(""));
-      ClaimedStanceSignatureArray.Add(TEXT(""));
-      StanceSourceVersions.Add(TEXT("invalid"));
-      bSuccess = false;
-      continue;
-    }
-
-    TSharedPtr<FJsonObject> Root;
-    const TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(FileContents);
-    if (!FJsonSerializer::Deserialize(Reader, Root) || !Root.IsValid()) {
-      UE_LOG(MoveDBLog, Error, TEXT("Invalid JSON in stance file: %s"), *FilePath);
-      CanonicalStancePayloadArray.Add(TEXT(""));
-      ClaimedStanceSignatureArray.Add(TEXT(""));
-      StanceSourceVersions.Add(TEXT("invalid"));
-      bSuccess = false;
-      continue;
-    }
-
-    const TSharedPtr<FJsonObject> Payload = Root->GetObjectField(TEXT("payload"));
-    if (!Payload.IsValid()) {
-      UE_LOG(MoveDBLog, Error, TEXT("Missing 'payload' in stance file: %s"), *FilePath);
-      CanonicalStancePayloadArray.Add(TEXT(""));
-      ClaimedStanceSignatureArray.Add(TEXT(""));
-      StanceSourceVersions.Add(TEXT("invalid"));
-      bSuccess = false;
-      continue;
-    }
-
-    FString CanonicalPayload;
-    const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&CanonicalPayload);
-    FJsonSerializer::Serialize(Payload.ToSharedRef(), Writer);
-    CanonicalStancePayloadArray.Add(CanonicalPayload);
+    CanonicalCharacterPayloadArray.Add(CanonicalPayload);
 
     FString Signature;
     if (!Root->TryGetStringField(TEXT("signature"), Signature)) {
       Signature = TEXT("");
     }
-    ClaimedStanceSignatureArray.Add(Signature);
+    ClaimedCharacterSignatureArray.Add(Signature);
+
+    FString Version;
+    if (!Payload->TryGetStringField(TEXT("version"), Version)) {
+      Version = TEXT("invalid");
+    }
+    CharacterSourceVersions.Add(Version);
   }
+
   return bSuccess;
 }
 
-// Move accessors
-FString FJsonFileListMoveDataSource::GetMoveRawPayload(int32 FileIndex) const {
-  return CanonicalMovePayloadArray.IsValidIndex(FileIndex) ? CanonicalMovePayloadArray[FileIndex]
-                                                           : TEXT("");
-}
-FString FJsonFileListMoveDataSource::GetMoveClaimedSignature(int32 FileIndex) const {
-  return ClaimedMoveSignatureArray.IsValidIndex(FileIndex) ? ClaimedMoveSignatureArray[FileIndex]
-                                                           : TEXT("");
-}
-FString FJsonFileListMoveDataSource::GetMoveSourceVersion(int32 FileIndex) const {
-  return MoveSourceVersions.IsValidIndex(FileIndex) ? MoveSourceVersions[FileIndex]
-                                                    : TEXT("invalid");
-}
-int32 FJsonFileListMoveDataSource::GetMoveSourceCount() const {
-  return CanonicalMovePayloadArray.Num();
+FString FJsonFileListMoveDataSource::GetCharacterSourceName() const {
+  return FString::Printf(TEXT("JSONFileList:Characters[%d files]"),
+                         CanonicalCharacterPayloadArray.Num());
 }
 
-// Stance accessors
-FString FJsonFileListMoveDataSource::GetStanceRawPayload(int32 FileIndex) const {
-  return CanonicalStancePayloadArray.IsValidIndex(FileIndex)
-             ? CanonicalStancePayloadArray[FileIndex]
+int32 FJsonFileListMoveDataSource::GetCharacterSourceCount() const {
+  return CanonicalCharacterPayloadArray.Num();
+}
+
+FString FJsonFileListMoveDataSource::GetCharacterRawPayload(int32 FileIndex) const {
+  return CanonicalCharacterPayloadArray.IsValidIndex(FileIndex)
+             ? CanonicalCharacterPayloadArray[FileIndex]
              : TEXT("");
 }
-FString FJsonFileListMoveDataSource::GetStanceClaimedSignature(int32 FileIndex) const {
-  return ClaimedStanceSignatureArray.IsValidIndex(FileIndex)
-             ? ClaimedStanceSignatureArray[FileIndex]
+
+FString FJsonFileListMoveDataSource::GetCharacterClaimedSignature(int32 FileIndex) const {
+  return ClaimedCharacterSignatureArray.IsValidIndex(FileIndex)
+             ? ClaimedCharacterSignatureArray[FileIndex]
              : TEXT("");
 }
-FString FJsonFileListMoveDataSource::GetStanceSourceVersion(int32 FileIndex) const {
-  return StanceSourceVersions.IsValidIndex(FileIndex) ? StanceSourceVersions[FileIndex]
-                                                      : TEXT("invalid");
-}
-int32 FJsonFileListMoveDataSource::GetStanceSourceCount() const {
-  return CanonicalStancePayloadArray.Num();
+
+FString FJsonFileListMoveDataSource::GetCharacterSourceVersion(int32 FileIndex) const {
+  return CharacterSourceVersions.IsValidIndex(FileIndex) ? CharacterSourceVersions[FileIndex]
+                                                         : TEXT("invalid");
 }

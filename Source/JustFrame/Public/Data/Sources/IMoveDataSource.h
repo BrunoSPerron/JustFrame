@@ -2,40 +2,23 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Data/Structs/Structs_Move.h"
+#include "Data/Structs/Structs_Character.h"
 
 class IMoveDataSource {
 public:
   virtual ~IMoveDataSource() = default;
 
-  virtual bool LoadMoveSources(const TArray<FString> &Collections) = 0;
-  virtual bool LoadStanceSources(const TArray<FString> &Collections) = 0;
+  virtual bool LoadCharacterSources(const TArray<FString> &Collections) = 0;
+  bool DeserializeCharacterPayloads(TArray<FMoveData> &OutMoves, TArray<FStanceData> &OutStances);
 
-  bool DeserializeMovePayloads(TArray<FMoveData> &OutMoves);
-  bool DeserializeStancePayloads(TArray<FStanceData> &OutStances);
-
-  // Move-specific accessors
-  virtual FString GetMoveSourceName() const = 0;
-  virtual int32 GetMoveSourceCount() const = 0;
-  virtual FString GetMoveRawPayload(int32 FileIndex) const = 0;
-  virtual FString GetMoveClaimedSignature(int32 FileIndex) const = 0;
-  virtual FString GetMoveSourceVersion(int32 FileIndex) const = 0;
-
-  // Stance-specific accessors
-  virtual FString GetStanceSourceName() const = 0;
-  virtual int32 GetStanceSourceCount() const = 0;
-  virtual FString GetStanceRawPayload(int32 FileIndex) const = 0;
-  virtual FString GetStanceClaimedSignature(int32 FileIndex) const = 0;
-  virtual FString GetStanceSourceVersion(int32 FileIndex) const = 0;
+  virtual FString GetCharacterSourceName() const = 0;
+  virtual int32 GetCharacterSourceCount() const = 0;
+  virtual FString GetCharacterRawPayload(int32 FileIndex) const = 0;
+  virtual FString GetCharacterClaimedSignature(int32 FileIndex) const = 0;
+  virtual FString GetCharacterSourceVersion(int32 FileIndex) const = 0;
 
 protected:
-  // Move payloads
-  TArray<FString> CanonicalMovePayloadArray;
-  TArray<FString> ClaimedMoveSignatureArray;
-  TArray<FString> MoveSourceVersions;
-
-  // Stance payloads
-  TArray<FString> CanonicalStancePayloadArray;
-  TArray<FString> ClaimedStanceSignatureArray;
-  TArray<FString> StanceSourceVersions;
+  TArray<FString> CanonicalCharacterPayloadArray;
+  TArray<FString> ClaimedCharacterSignatureArray;
+  TArray<FString> CharacterSourceVersions;
 };

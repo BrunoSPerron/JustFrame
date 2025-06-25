@@ -3,50 +3,27 @@
 #include "Data/LogCategories.h"
 #include "Utilities/PayloadDeserializer.h"
 
-bool IMoveDataSource::DeserializeMovePayloads(TArray<FMoveData> &OutMoves) {
+bool IMoveDataSource::DeserializeCharacterPayloads(TArray<FMoveData> &OutMoves,
+                                                   TArray<FStanceData> &OutStances) {
   bool bSuccess = true;
 
-  for (int32 i = 0; i < CanonicalMovePayloadArray.Num(); ++i) {
-    const FString &PayloadString = CanonicalMovePayloadArray[i];
+  for (int32 i = 0; i < CanonicalCharacterPayloadArray.Num(); ++i) {
+    const FString &PayloadString = CanonicalCharacterPayloadArray[i];
     if (PayloadString.IsEmpty()) {
-      UE_LOG(MoveDBLog, Error, TEXT("Empty move payload string at index %d"), i);
+      UE_LOG(MoveDBLog, Error, TEXT("Empty character payload string at index %d"), i);
       bSuccess = false;
       continue;
     }
 
-    FDeserializedMovePayload Parsed;
-    if (!FMovePayloadDeserializer::DeserializeMoveFromPayload(PayloadString, Parsed)) {
-      UE_LOG(MoveDBLog, Error, TEXT("Failed to deserialize move payload at index %d"), i);
+    FDeserializedCharacterPayload Parsed;
+    if (!FMovePayloadDeserializer::DeserializeCharacterPayload(PayloadString, Parsed)) {
+      UE_LOG(MoveDBLog, Error, TEXT("Failed to deserialize character payload at index %d"), i);
       bSuccess = false;
       continue;
     }
 
-    MoveSourceVersions.Add(Parsed.Version);
+    CharacterSourceVersions.Add(Parsed.Version);
     OutMoves.Append(Parsed.Moves);
-  }
-
-  return bSuccess;
-}
-
-bool IMoveDataSource::DeserializeStancePayloads(TArray<FStanceData> &OutStances) {
-  bool bSuccess = true;
-
-  for (int32 i = 0; i < CanonicalStancePayloadArray.Num(); ++i) {
-    const FString &PayloadString = CanonicalStancePayloadArray[i];
-    if (PayloadString.IsEmpty()) {
-      UE_LOG(MoveDBLog, Error, TEXT("Empty stance payload string at index %d"), i);
-      bSuccess = false;
-      continue;
-    }
-
-    FDeserializedStancePayload Parsed;
-    if (!FMovePayloadDeserializer::DeserializeStanceFromPayload(PayloadString, Parsed)) {
-      UE_LOG(MoveDBLog, Error, TEXT("Failed to deserialize stance payload at index %d"), i);
-      bSuccess = false;
-      continue;
-    }
-
-    StanceSourceVersions.Add(Parsed.Version);
     OutStances.Append(Parsed.Stances);
   }
 

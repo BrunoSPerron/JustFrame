@@ -3,7 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "Characters/Base/RollbackCharacter.h"
-#include "Data/Structs/Structs_Move.h"
+#include "Data/Structs/Structs_Character.h"
 
 /*  Stances self register using
 #include "Characters/State/Stance/StanceRegistration.h"

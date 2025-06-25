@@ -4,85 +4,77 @@
 #include "Serialization/JsonSerializer.h"
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
-#include "Data/LogCategories.h"
 #include "JsonObjectConverter.h"
+#include "Data/LogCategories.h"
 
-bool FMovePayloadDeserializer::DeserializeMoveFromPayload(const FString &CanonicalPayload,
-                                                          FDeserializedMovePayload &OutData) {
+bool FMovePayloadDeserializer::DeserializeCharacterPayload(const FString &CanonicalPayload,
+                                                           FDeserializedCharacterPayload &OutData) {
   TSharedPtr<FJsonObject> Payload;
   TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(CanonicalPayload);
   if (!FJsonSerializer::Deserialize(Reader, Payload) || !Payload.IsValid()) {
-    UE_LOG(MoveDBLog, Error, TEXT("Invalid JSON payload for move data"));
+    UE_LOG(MoveDBLog, Error, TEXT("Invalid JSON payload for character data"));
     return false;
   }
 
   if (!Payload->TryGetStringField(TEXT("version"), OutData.Version) || OutData.Version.IsEmpty()) {
-    UE_LOG(MoveDBLog, Error, TEXT("Missing 'version' field in move payload"));
+    UE_LOG(MoveDBLog, Error, TEXT("Missing 'version' field in character payload"));
     return false;
   }
 
-  const TArray<TSharedPtr<FJsonValue>> *RawMoveArray = nullptr;
-  if (!Payload->TryGetArrayField(TEXT("moves"), RawMoveArray) || !RawMoveArray) {
-    UE_LOG(MoveDBLog, Error, TEXT("Missing or invalid 'moves' array in move payload"));
-    return false;
+  ParseMoveArray(Payload, OutData.Moves);
+  ParseStanceArray(Payload, OutData.Stances);
+
+  return true;
+}
+
+void FMovePayloadDeserializer::ParseMoveArray(const TSharedPtr<FJsonObject> &Payload,
+                                              TArray<FMoveData> &OutMoves) {
+  const TArray<TSharedPtr<FJsonValue>> *RawArray = nullptr;
+  if (!Payload->TryGetArrayField(TEXT("moves"), RawArray) || !RawArray) {
+    UE_LOG(MoveDBLog, Warning, TEXT("No 'moves' array found in character payload"));
+    return;
   }
 
-  for (const TSharedPtr<FJsonValue> &Value : *RawMoveArray) {
+  for (const TSharedPtr<FJsonValue> &Value : *RawArray) {
     const TSharedPtr<FJsonObject> Object = Value->AsObject();
     if (!Object.IsValid()) {
       UE_LOG(MoveDBLog, Warning, TEXT("Invalid move entry (not an object)"));
       continue;
     }
 
-    FMoveData ParsedMove;
+    FMoveData Parsed;
     if (!FJsonObjectConverter::JsonObjectToUStruct(Object.ToSharedRef(), FMoveData::StaticStruct(),
-                                                   &ParsedMove, 0, 0)) {
+                                                   &Parsed, 0, 0)) {
       UE_LOG(MoveDBLog, Warning, TEXT("Failed to parse move entry to struct"));
       continue;
     }
 
-    OutData.Moves.Add(ParsedMove);
+    OutMoves.Add(Parsed);
   }
-
-  return true;
 }
 
-bool FMovePayloadDeserializer::DeserializeStanceFromPayload(const FString &CanonicalPayload,
-                                                            FDeserializedStancePayload &OutData) {
-  TSharedPtr<FJsonObject> Payload;
-  TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(CanonicalPayload);
-  if (!FJsonSerializer::Deserialize(Reader, Payload) || !Payload.IsValid()) {
-    UE_LOG(MoveDBLog, Error, TEXT("Invalid JSON payload for stance data"));
-    return false;
+void FMovePayloadDeserializer::ParseStanceArray(const TSharedPtr<FJsonObject> &Payload,
+                                                TArray<FStanceData> &OutStances) {
+  const TArray<TSharedPtr<FJsonValue>> *RawArray = nullptr;
+  if (!Payload->TryGetArrayField(TEXT("stances"), RawArray) || !RawArray) {
+    UE_LOG(MoveDBLog, Warning, TEXT("No 'stances' array found in character payload"));
+    return;
   }
 
-  if (!Payload->TryGetStringField(TEXT("version"), OutData.Version) || OutData.Version.IsEmpty()) {
-    UE_LOG(MoveDBLog, Error, TEXT("Missing 'version' field in stance payload"));
-    return false;
-  }
-
-  const TArray<TSharedPtr<FJsonValue>> *RawStanceArray = nullptr;
-  if (!Payload->TryGetArrayField(TEXT("stances"), RawStanceArray) || !RawStanceArray) {
-    UE_LOG(MoveDBLog, Error, TEXT("Missing or invalid 'stances' array in stance payload"));
-    return false;
-  }
-
-  for (const TSharedPtr<FJsonValue> &Value : *RawStanceArray) {
+  for (const TSharedPtr<FJsonValue> &Value : *RawArray) {
     const TSharedPtr<FJsonObject> Object = Value->AsObject();
     if (!Object.IsValid()) {
       UE_LOG(MoveDBLog, Warning, TEXT("Invalid stance entry (not an object)"));
       continue;
     }
 
-    FStanceData ParsedStance;
-    if (!FJsonObjectConverter::JsonObjectToUStruct(
-            Object.ToSharedRef(), FStanceData::StaticStruct(), &ParsedStance, 0, 0)) {
+    FStanceData Parsed;
+    if (!FJsonObjectConverter::JsonObjectToUStruct(Object.ToSharedRef(),
+                                                   FStanceData::StaticStruct(), &Parsed, 0, 0)) {
       UE_LOG(MoveDBLog, Warning, TEXT("Failed to parse stance entry to struct"));
       continue;
     }
 
-    OutData.Stances.Add(ParsedStance);
+    OutStances.Add(Parsed);
   }
-
-  return true;
 }

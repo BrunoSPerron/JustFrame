@@ -59,6 +59,27 @@
           5, 5, 5, 5, 5, 5, 5, 5, 5, 5
         ]
       }
+    ],
+    "stances": [
+      {
+        "version": "0.0.1",
+        "StanceId": "BasicGrounded",
+        "Animation": "Stance_Grounded",
+        "TransitionFX": [],
+        "AvailableMoves": [
+          "SimplePunch",
+          "SimpleHighKick"
+        ],
+        "AllowMovement": true,
+        "MaxWalkSpeed": 400,
+        "Acceleration": 800,
+        "Friction": 6,
+        "TurnRate": 360,
+        "CanBlock": true,
+        "Balance": 100,
+        "IsAirborne": false,
+        "IsCrouching": false
+      }
     ]
   }
 }

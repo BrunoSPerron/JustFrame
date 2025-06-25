@@ -10,7 +10,7 @@ class UInputBufferManager;
 class UInputPollingService;
 class UPlayerSettingsManager;
 class URollbackSimulationManager;
-class UCharacterDataDatabase;
+class UCharacterDatabase;
 
 // Access from anywhere
 // GetGameInstance()->GetSubsystem<UGameManagerSubsystem>();
@@ -27,7 +27,7 @@ public:
   UInputPollingService *GetInputPollingService() const { return InputPollingService; }
   UPlayerSettingsManager *GetPlayerSettingsManager() const { return PlayerSettingsManager; }
   URollbackSimulationManager *GetRollbackSimManager() const { return RollbackSimManager; }
-  UCharacterDataDatabase *GetCharacterDataDatabase() const { return CharacterDataDatabase; }
+  UCharacterDatabase *GetCharacterDatabase() const { return CharacterDatabase; }
 
   void SetupManagers(uint8 NumPlayers, const TArray<ARollbackCharacter *> &Characters);
 
@@ -45,5 +45,5 @@ private:
   URollbackSimulationManager *RollbackSimManager;
 
   UPROPERTY()
-  UCharacterDataDatabase *CharacterDataDatabase;
+  UCharacterDatabase *CharacterDatabase;
 };

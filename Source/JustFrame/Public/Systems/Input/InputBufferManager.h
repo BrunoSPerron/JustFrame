@@ -31,5 +31,4 @@ private:
   TMap<uint32, FInputFrame> InputHistory;
   int32 MaxFrame;
   uint8 PlayerCount;
-  uint64 SimStartCycles = 0;
 };

@@ -2,7 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Data/Structs/Structs_Move.h"
+#include "Data/Structs/Structs_Character.h"
 
 struct FMoveInstance {
   const FMoveData *Move = nullptr;

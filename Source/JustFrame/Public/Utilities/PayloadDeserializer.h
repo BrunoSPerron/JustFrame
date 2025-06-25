@@ -3,22 +3,20 @@
 
 #include "CoreMinimal.h"
 #include "Dom/JsonValue.h"
-#include "Data/Structs/Structs_Move.h"
+#include "Data/Structs/Structs_Character.h"
 
-struct FDeserializedMovePayload {
+struct FDeserializedCharacterPayload {
   FString Version;
   TArray<FMoveData> Moves;
-};
-
-struct FDeserializedStancePayload {
-  FString Version;
   TArray<FStanceData> Stances;
 };
 
-class FMovePayloadDeserializer {
-public:
-  static bool DeserializeMoveFromPayload(const FString &CanonicalPayload,
-                                         FDeserializedMovePayload &OutData);
-  static bool DeserializeStanceFromPayload(const FString &CanonicalPayload,
-                                           FDeserializedStancePayload &OutData);
+struct FMovePayloadDeserializer {
+  static bool DeserializeCharacterPayload(const FString &CanonicalPayload,
+                                          FDeserializedCharacterPayload &OutData);
+
+private:
+  static void ParseMoveArray(const TSharedPtr<FJsonObject> &Payload, TArray<FMoveData> &OutMoves);
+  static void ParseStanceArray(const TSharedPtr<FJsonObject> &Payload,
+                               TArray<FStanceData> &OutStances);
 };

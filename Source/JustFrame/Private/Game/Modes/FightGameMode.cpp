@@ -15,12 +15,6 @@ AFightGameMode::AFightGameMode() {
 void AFightGameMode::BeginPlay() {
   Super::BeginPlay();
 
-  // Ensure Local player exists
-  if (GetGameInstance()->GetFirstLocalPlayerController() == nullptr) {
-    FString Error;
-    GetGameInstance()->CreateLocalPlayer(0, Error, true);
-  }
-
   ForTestOnly_Autosetup();
   ResetSimulationTimer(TickRate);
 }

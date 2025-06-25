@@ -3,7 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "Data/Structs/Enums_Character.h"
-#include "Structs_Move.generated.h"
+#include "Structs_Character.generated.h"
 
 USTRUCT()
 struct FInputCondition {

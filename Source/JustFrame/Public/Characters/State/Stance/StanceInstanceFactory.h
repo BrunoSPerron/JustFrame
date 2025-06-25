@@ -3,7 +3,7 @@
 
 #include "Characters/State/Stance/StanceInstance.h"
 #include "CoreMinimal.h"
-#include "Data/Structs/Structs_Move.h"
+#include "Data/Structs/Structs_Character.h"
 #include "UObject/Object.h"
 #include "StanceInstanceFactory.generated.h"
 
