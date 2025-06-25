@@ -4,7 +4,7 @@
     "version": "0.0.1",
     "moves": [
       {
-        "MoveID": "SimplePunch",
+        "MoveID": "QuinnPunch",
         "Animation": "Anim_SimplePunch",
         "StartupFrames": 6,
         "ActiveFrames": 3,
@@ -33,7 +33,7 @@
         ]
       },
       {
-        "MoveID": "SimpleHighKick",
+        "MoveID": "QuinnHighKick",
         "Animation": "Anim_SimpleHighKick",
         "StartupFrames": 8,
         "ActiveFrames": 3,
@@ -64,11 +64,11 @@
       {
         "version": "0.0.1",
         "StanceId": "BasicGrounded",
-        "Animation": "Stance_Grounded",
+        "Animation": "Neutral8Way",
         "TransitionFX": [],
         "AvailableMoves": [
-          "SimplePunch",
-          "SimpleHighKick"
+          "QuinnPunch",
+          "QuinnHighKick"
         ],
         "AllowMovement": true,
         "MaxWalkSpeed": 400,

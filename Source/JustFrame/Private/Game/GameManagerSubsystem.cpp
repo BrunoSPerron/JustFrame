@@ -42,7 +42,7 @@ void UGameManagerSubsystem::SetupManagers(uint8 NumPlayers,
   }
   if (!CharacterDatabase) {
     CharacterDatabase = NewObject<UCharacterDatabase>();
-    TArray<FString> CharacterCollections = {TEXT("test")};
+    TArray<FString> CharacterCollections = {TEXT("Manny")};
     CharacterDatabase->LoadCharacterData(CharacterCollections);
   }
 }

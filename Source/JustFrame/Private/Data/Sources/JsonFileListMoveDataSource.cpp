@@ -3,31 +3,33 @@
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "Dom/JsonObject.h"
-#include "Dom/JsonValue.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "JsonObjectConverter.h"
 #include "Data/LogCategories.h"
 
-bool FJsonFileListMoveDataSource::LoadCharacterSources(const TArray<FString> &Collections) {
+// Every Frame is a Choice //
+bool FJsonFileListMoveDataSource::LoadCharacterSources(const TArray<FString> &Collections,
+                                                       TArray<FMoveData> &OutMoves,
+                                                       TArray<FStanceData> &OutStances) {
   bool bSuccess = true;
-
   CharacterFilePaths.Reset();
-  for (const FString &Collection : Collections) {
-    CharacterFilePaths.Add(FPaths::ProjectDir() / TEXT("ExternalData/Characters") /
-                           (Collection + TEXT(".json")));
-  }
-
-  CanonicalCharacterPayloadArray.Reset();
-  ClaimedCharacterSignatureArray.Reset();
   CharacterSourceVersions.Reset();
 
-  for (const FString &FilePath : CharacterFilePaths) {
+  TArray<FString> RawPayloads;
+
+  for (const FString &Collection : Collections) {
+    const FString FilePath =
+        FPaths::ProjectDir() / TEXT("ExternalData/Core/Characters") / (Collection + TEXT(".json"));
+    CharacterFilePaths.Add(FilePath);
+
     FString FileContents;
     if (!FFileHelper::LoadFileToString(FileContents, *FilePath)) {
-      UE_LOG(MoveDBLog, Error, TEXT("Failed to load character data file: %s"), *FilePath);
-      CanonicalCharacterPayloadArray.Add(TEXT(""));
-      ClaimedCharacterSignatureArray.Add(TEXT(""));
+      UE_LOG(MoveDBLog, Error,
+             TEXT("FJsonFileListMoveDataSource::LoadCharacterSources Failed to load character "
+                  "data file: %s"),
+             *FilePath);
+      RawPayloads.Add(TEXT(""));
       CharacterSourceVersions.Add(TEXT("invalid"));
       bSuccess = false;
       continue;
@@ -36,67 +38,37 @@ bool FJsonFileListMoveDataSource::LoadCharacterSources(const TArray<FString> &Co
     TSharedPtr<FJsonObject> Root;
     const TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(FileContents);
     if (!FJsonSerializer::Deserialize(Reader, Root) || !Root.IsValid()) {
-      UE_LOG(MoveDBLog, Error, TEXT("Invalid JSON in character file: %s"), *FilePath);
-      CanonicalCharacterPayloadArray.Add(TEXT(""));
-      ClaimedCharacterSignatureArray.Add(TEXT(""));
+      UE_LOG(MoveDBLog, Error,
+             TEXT("FJsonFileListMoveDataSource::LoadCharacterSources Invalid JSON in character "
+                  "file: %s"),
+             *FilePath);
+      RawPayloads.Add(TEXT(""));
       CharacterSourceVersions.Add(TEXT("invalid"));
       bSuccess = false;
       continue;
     }
 
-    const TSharedPtr<FJsonObject> Payload = Root->GetObjectField(TEXT("payload"));
-    if (!Payload.IsValid()) {
-      UE_LOG(MoveDBLog, Error, TEXT("Missing 'payload' in character file: %s"), *FilePath);
-      CanonicalCharacterPayloadArray.Add(TEXT(""));
-      ClaimedCharacterSignatureArray.Add(TEXT(""));
-      CharacterSourceVersions.Add(TEXT("invalid"));
-      bSuccess = false;
-      continue;
-    }
-
-    FString CanonicalPayload;
+    FString Payload;
     {
-      const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&CanonicalPayload);
-      FJsonSerializer::Serialize(Payload.ToSharedRef(), Writer);
+      const TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&Payload);
+      FJsonSerializer::Serialize(Root.ToSharedRef(), Writer);
     }
 
-    CanonicalCharacterPayloadArray.Add(CanonicalPayload);
-
-    FString Signature;
-    if (!Root->TryGetStringField(TEXT("signature"), Signature)) {
-      Signature = TEXT("");
-    }
-    ClaimedCharacterSignatureArray.Add(Signature);
+    RawPayloads.Add(Payload);
 
     FString Version;
-    if (!Payload->TryGetStringField(TEXT("version"), Version)) {
+    if (!Root->TryGetStringField(TEXT("version"), Version)) {
       Version = TEXT("invalid");
     }
     CharacterSourceVersions.Add(Version);
   }
 
+  bSuccess &= DeserializeCharacterPayloads(RawPayloads, OutMoves, OutStances);
   return bSuccess;
 }
 
-FString FJsonFileListMoveDataSource::GetCharacterSourceName() const {
-  return FString::Printf(TEXT("JSONFileList:Characters[%d files]"),
-                         CanonicalCharacterPayloadArray.Num());
-}
-
 int32 FJsonFileListMoveDataSource::GetCharacterSourceCount() const {
-  return CanonicalCharacterPayloadArray.Num();
-}
-
-FString FJsonFileListMoveDataSource::GetCharacterRawPayload(int32 FileIndex) const {
-  return CanonicalCharacterPayloadArray.IsValidIndex(FileIndex)
-             ? CanonicalCharacterPayloadArray[FileIndex]
-             : TEXT("");
-}
-
-FString FJsonFileListMoveDataSource::GetCharacterClaimedSignature(int32 FileIndex) const {
-  return ClaimedCharacterSignatureArray.IsValidIndex(FileIndex)
-             ? ClaimedCharacterSignatureArray[FileIndex]
-             : TEXT("");
+  return CharacterFilePaths.Num();
 }
 
 FString FJsonFileListMoveDataSource::GetCharacterSourceVersion(int32 FileIndex) const {

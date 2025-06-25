@@ -1,0 +1,21 @@
+{
+  "signature": "abc123...",
+  "payload": [
+    {
+      "id": "manny",
+      "name": "Manny",
+      "card": "UI/CharacterSelect/Cards/Manny.png",
+      "archetype": "Balanced",
+      "difficulty": 2,
+      "dataPath": "Characters/Manny.json"
+    },
+    {
+      "id": "quinn",
+      "name": "Quinn",
+      "card": "UI/CharacterSelect/Cards/Quinn.png",
+      "archetype": "Rushdown",
+      "difficulty": 4,
+      "dataPath": "Characters/Quinn.json"
+    }
+  ]
+}

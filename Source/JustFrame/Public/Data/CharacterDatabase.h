@@ -7,8 +7,6 @@
 #include "Data/Sources/IMoveDataSource.h"
 #include "CharacterDatabase.generated.h"
 
-class IMoveDataSource;
-
 UCLASS()
 class UCharacterDatabase : public UObject {
   GENERATED_BODY()
@@ -25,6 +23,9 @@ public:
   uint16 GetStanceIndex(FString StanceId) const;
 
 private:
+  void BuildMoveTables(const TArray<FMoveData> &Moves);
+  void BuildStanceTables(const TArray<FStanceData> &Stances);
+
   TUniquePtr<IMoveDataSource> DataSource;
 
   TMap<FName, FMoveData> MoveMap;
