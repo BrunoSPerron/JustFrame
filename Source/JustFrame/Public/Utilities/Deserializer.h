@@ -3,7 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "Dom/JsonValue.h"
-#include "Data/Structs/Structs_Character.h"
+#include "Data/Structs/CharacterStructs.h"
 
 struct FDeserializedCharacterPayload {
   FString Version;
@@ -11,7 +11,7 @@ struct FDeserializedCharacterPayload {
   TArray<FStanceData> Stances;
 };
 
-struct FMovePayloadDeserializer {
+struct FMoveDeserializer {
   static bool DeserializeCharacterPayload(const FString &CanonicalPayload,
                                           FDeserializedCharacterPayload &OutData);
 

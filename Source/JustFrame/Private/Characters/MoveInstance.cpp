@@ -1,4 +1,4 @@
-#include "Characters/State/MoveInstance.h"
+#include "Characters/MoveInstance.h"
 
 bool FMoveInstance::IsStartup() const { return Move && CurrentFrame < Move->StartupFrames; }
 

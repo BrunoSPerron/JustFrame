@@ -1,6 +1,6 @@
 // Every Frame is a Choice //
 #include "Systems/Rollback/RollbackSimulationManager.h"
-#include "Characters/Base/RollbackCharacter.h"
+#include "Characters/RollbackCharacter.h"
 #include "Data/Consts.h"
 #include "Data/LogCategories.h"
 #include "Kismet/GameplayStatics.h"

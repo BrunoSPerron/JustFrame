@@ -1,6 +1,6 @@
 // Every Frame is a Choice //
-#include "Game/Modes/FightGameMode.h"
-#include "Characters/Base/RollbackCharacter.h"
+#include "Game/GameModes/FightGameMode.h"
+#include "Characters/RollbackCharacter.h"
 #include "Game/Camera/FightCameraActor.h"
 #include "Game/GameManagerSubsystem.h"
 #include "Kismet/GameplayStatics.h"

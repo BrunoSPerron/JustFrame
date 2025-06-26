@@ -1,5 +1,5 @@
 // Every Frame is a Choice //
-#include "Characters/State/Stance/StanceInstanceFactory.h"
+#include "Characters/Stance/StanceInstanceFactory.h"
 
 TMap<FString, TFunction<TSharedPtr<FStanceInstance>(ARollbackCharacter *, const FStanceData &)>> &
 UStanceInstanceFactory::GetRegistry() {

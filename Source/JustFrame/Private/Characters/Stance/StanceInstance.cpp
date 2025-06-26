@@ -1,4 +1,4 @@
-#include "Characters/State/Stance/StanceInstance.h"
+#include "Characters/Stance/StanceInstance.h"
 #include "Game/GameManagerSubsystem.h"
 #include "Systems/Rollback/RollbackSimulationManager.h"
 

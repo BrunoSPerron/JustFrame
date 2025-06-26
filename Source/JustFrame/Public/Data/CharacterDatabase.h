@@ -3,7 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "Data/Structs/Structs_Character.h"
+#include "Data/Structs/CharacterStructs.h"
 #include "Data/Sources/IMoveDataSource.h"
 #include "CharacterDatabase.generated.h"
 

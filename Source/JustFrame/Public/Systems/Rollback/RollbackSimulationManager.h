@@ -4,7 +4,7 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "Systems/Input/InputBufferManager.h"
-#include "Characters/Base/RollbackCharacter.h"
+#include "Characters/RollbackCharacter.h"
 #include "RollbackSimulationManager.generated.h"
 
 USTRUCT()

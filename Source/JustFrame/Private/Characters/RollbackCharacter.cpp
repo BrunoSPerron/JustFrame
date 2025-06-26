@@ -1,9 +1,9 @@
 // Every Frame is a Choice //
-#include "Characters/Base/RollbackCharacter.h"
-#include "Characters/State/Stance/StanceInstance.h"
+#include "Characters/RollbackCharacter.h"
+#include "Characters/Stance/StanceInstance.h"
 #include "Data/Consts.h"
 #include "Data/LogCategories.h"
-#include "Data/Structs/Enums_Input.h"
+#include "Data/Structs/InputEnums.h"
 #include "Engine/Engine.h"
 #include "Serialization/MemoryReader.h"
 #include "Serialization/MemoryWriter.h"
@@ -34,8 +34,8 @@ ARollbackCharacter::ARollbackCharacter() {
 }
 
 //Temporary includes
-#include "Characters/State/Stance/StanceInstanceFactory.h"
-#include "Characters/State/Stance/NeutralStance8Way.h"
+#include "Characters/Stance/StanceInstanceFactory.h"
+#include "Characters/Stance/Types/NeutralStance8Way.h"
 void ARollbackCharacter::BeginPlay() {
   Super::BeginPlay();
 

@@ -1,5 +1,5 @@
 // Every Frame is a Choice //
-#include "Utilities/PayloadDeserializer.h"
+#include "Utilities/Deserializer.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "Dom/JsonObject.h"
@@ -7,8 +7,8 @@
 #include "JsonObjectConverter.h"
 #include "Data/LogCategories.h"
 
-bool FMovePayloadDeserializer::DeserializeCharacterPayload(const FString &CanonicalPayload,
-                                                           FDeserializedCharacterPayload &OutData) {
+bool FMoveDeserializer::DeserializeCharacterPayload(const FString &CanonicalPayload,
+                                                    FDeserializedCharacterPayload &OutData) {
   TSharedPtr<FJsonObject> Payload;
   TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(CanonicalPayload);
   if (!FJsonSerializer::Deserialize(Reader, Payload) || !Payload.IsValid()) {
@@ -27,8 +27,8 @@ bool FMovePayloadDeserializer::DeserializeCharacterPayload(const FString &Canoni
   return true;
 }
 
-void FMovePayloadDeserializer::ParseMoveArray(const TSharedPtr<FJsonObject> &Payload,
-                                              TArray<FMoveData> &OutMoves) {
+void FMoveDeserializer::ParseMoveArray(const TSharedPtr<FJsonObject> &Payload,
+                                       TArray<FMoveData> &OutMoves) {
   const TArray<TSharedPtr<FJsonValue>> *RawArray = nullptr;
   if (!Payload->TryGetArrayField(TEXT("moves"), RawArray) || !RawArray) {
     UE_LOG(MoveDBLog, Warning, TEXT("No 'moves' array found in character payload"));
@@ -53,8 +53,8 @@ void FMovePayloadDeserializer::ParseMoveArray(const TSharedPtr<FJsonObject> &Pay
   }
 }
 
-void FMovePayloadDeserializer::ParseStanceArray(const TSharedPtr<FJsonObject> &Payload,
-                                                TArray<FStanceData> &OutStances) {
+void FMoveDeserializer::ParseStanceArray(const TSharedPtr<FJsonObject> &Payload,
+                                         TArray<FStanceData> &OutStances) {
   const TArray<TSharedPtr<FJsonValue>> *RawArray = nullptr;
   if (!Payload->TryGetArrayField(TEXT("stances"), RawArray) || !RawArray) {
     UE_LOG(MoveDBLog, Warning, TEXT("No 'stances' array found in character payload"));

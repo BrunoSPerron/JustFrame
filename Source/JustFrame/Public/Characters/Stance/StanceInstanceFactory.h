@@ -1,9 +1,9 @@
 // Every Frame is a Choice //
 #pragma once
 
-#include "Characters/State/Stance/StanceInstance.h"
+#include "Characters/Stance/StanceInstance.h"
 #include "CoreMinimal.h"
-#include "Data/Structs/Structs_Character.h"
+#include "Data/Structs/CharacterStructs.h"
 #include "UObject/Object.h"
 #include "StanceInstanceFactory.generated.h"
 

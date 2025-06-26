@@ -2,8 +2,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Data/Structs/Enums_Character.h"
-#include "Structs_Character.generated.h"
+#include "Data/Structs/CharacterEnums.h"
+#include "CharacterStructs.generated.h"
 
 USTRUCT()
 struct FInputCondition {

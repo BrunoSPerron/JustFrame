@@ -2,11 +2,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Characters/Base/RollbackCharacter.h"
-#include "Data/Structs/Structs_Character.h"
+#include "Characters/RollbackCharacter.h"
+#include "Data/Structs/CharacterStructs.h"
 
 /*  Stances self register using
-#include "Characters/State/Stance/StanceRegistration.h"
+#include "Characters/Stance/StanceRegistration.h"
 REGISTER_STANCE_INSTANCE(FMyStance, TEXT("JumpForward"));
 */
 

@@ -1,7 +1,7 @@
 // Every Frame is a Choice //
 #pragma once
 
-#include "Characters/State/Stance/StanceInstance.h"
+#include "Characters/Stance/StanceInstance.h"
 
 class FNeutralStance8Way : public FStanceInstance {
 public:

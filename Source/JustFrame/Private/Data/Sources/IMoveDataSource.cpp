@@ -1,7 +1,7 @@
 // Every Frame is a Choice //
 #include "Data/Sources/IMoveDataSource.h"
 #include "Data/LogCategories.h"
-#include "Utilities/PayloadDeserializer.h"
+#include "Utilities/Deserializer.h"
 
 bool IMoveDataSource::DeserializeCharacterPayloads(const TArray<FString> &RawJsonPayloads,
                                                    TArray<FMoveData> &OutMoves,
@@ -17,7 +17,7 @@ bool IMoveDataSource::DeserializeCharacterPayloads(const TArray<FString> &RawJso
     }
 
     FDeserializedCharacterPayload Parsed;
-    if (!FMovePayloadDeserializer::DeserializeCharacterPayload(JsonString, Parsed)) {
+    if (!FMoveDeserializer::DeserializeCharacterPayload(JsonString, Parsed)) {
       UE_LOG(MoveDBLog, Error, TEXT("Failed to deserialize character payload at index %d"), i);
       bSuccess = false;
       continue;

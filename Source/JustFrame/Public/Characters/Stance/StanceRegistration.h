@@ -1,7 +1,7 @@
 // Every Frame is a Choice //
 #pragma once
 
-#include "Characters/State/Stance/StanceInstanceFactory.h"
+#include "Characters/Stance/StanceInstanceFactory.h"
 
 #define REGISTER_STANCE_INSTANCE(Type, Id)                                                         \
   static struct FAutoRegister_##Type {                                                             \

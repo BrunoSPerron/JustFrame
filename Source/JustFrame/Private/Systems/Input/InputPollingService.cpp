@@ -1,6 +1,6 @@
 // Every Frame is a Choice //
 #include "Systems/Input/InputPollingService.h"
-#include "Data/Structs/Enums_Input.h"
+#include "Data/Structs/InputEnums.h"
 #include "Data/LogCategories.h"
 #include "Engine/Engine.h"
 #include "GameFramework/PlayerController.h"

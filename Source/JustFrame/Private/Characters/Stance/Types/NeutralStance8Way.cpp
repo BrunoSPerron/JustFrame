@@ -1,8 +1,8 @@
 // Every Frame is a Choice //
-#include "Characters/State/Stance/NeutralStance8Way.h"
-#include "Characters/State/Stance/StanceRegistration.h"
-#include "Characters/Base/RollbackCharacter.h"
-#include "Data/Structs/Enums_Input.h"
+#include "Characters/Stance/Types/NeutralStance8Way.h"
+#include "Characters/Stance/StanceRegistration.h"
+#include "Characters/RollbackCharacter.h"
+#include "Data/Structs/InputEnums.h"
 #include "Data/LogCategories.h"
 
 FNeutralStance8Way::FNeutralStance8Way(ARollbackCharacter *InOwner, const FStanceData &InData)
