@@ -1,9 +1,21 @@
 {
   "signature": "abc123...",
   "payload": {
-    "Characters/Manny.json": "9a2b7d...",
-    "Characters/Quinn.json": "de6c91...",
-    "UI/CharacterSelect/Cards/Manny.png": "8126af...",
-    "UI/CharacterSelect/Cards/Quinn.png": "cd3f01..."
+    "Characters/Manny.json": {
+      "hash": "9a2b7d...",
+      "version": "1.0"
+    },
+    "Characters/Quinn.json": {
+      "hash": "de6c91...",
+      "version": "1.1"
+    },
+    "UI/CharacterSelect/Cards/Manny.png": {
+      "hash": "8126af...",
+      "version": "1.0"
+    },
+    "UI/CharacterSelect/Cards/Quinn.png": {
+      "hash": "cd3f01...",
+      "version": "1.0"
+    }
   }
 }

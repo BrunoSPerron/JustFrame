@@ -5,14 +5,30 @@
 #include "Data/Structs/CharacterEnums.h"
 #include "CharacterStructs.generated.h"
 
+struct FDeserializedCharacterData {
+  FString Version;
+  TArray<FMoveData> Moves;
+  TArray<FStanceData> Stances;
+};
+
+USTRUCT()
+struct FCharacterListEntry {
+  GENERATED_BODY()
+
+  UPROPERTY() FString Id;
+  UPROPERTY() FString Name;
+  UPROPERTY() FString Card;
+  UPROPERTY() FString Archetype;
+  UPROPERTY() int32 Difficulty = 0;
+  UPROPERTY() FString DataPath;
+};
+
 USTRUCT()
 struct FInputCondition {
   GENERATED_BODY()
 
-  UPROPERTY()
-  TArray<uint16> Input;
-  UPROPERTY()
-  bool bAllowBuffer = true;
+  UPROPERTY() TArray<uint16> Input;
+  UPROPERTY() bool bAllowBuffer = true;
 };
 
 USTRUCT()
@@ -58,8 +74,8 @@ struct FStanceData {
   GENERATED_BODY()
 
   UPROPERTY() FString Version;
-  UPROPERTY() FString StanceId;
-  UPROPERTY() FString AnimationSetId;
+  UPROPERTY() FName StanceId;
+  UPROPERTY() FName AnimationSetId;
   UPROPERTY() FString StanceType;
   UPROPERTY() TArray<FString> TransitionFX;
   UPROPERTY() TArray<FString> AvailableMoves;

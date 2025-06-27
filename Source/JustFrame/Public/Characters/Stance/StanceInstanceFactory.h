@@ -18,12 +18,12 @@ public:
                                             const FStanceData &StanceData);
 
   static void
-  Register(const FString &StanceId,
+  Register(const FName &StanceId,
            TFunction<TSharedPtr<FStanceInstance>(ARollbackCharacter *, const FStanceData &)>
                Constructor);
 
 private:
-  static TMap<FString,
+  static TMap<FName,
               TFunction<TSharedPtr<FStanceInstance>(ARollbackCharacter *, const FStanceData &)>> &
   GetRegistry();
 };

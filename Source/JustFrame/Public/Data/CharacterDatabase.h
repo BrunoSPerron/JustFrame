@@ -2,37 +2,39 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
+#include "UObject/Object.h"
 #include "Data/Structs/CharacterStructs.h"
-#include "Data/Sources/IMoveDataSource.h"
 #include "CharacterDatabase.generated.h"
 
 UCLASS()
-class UCharacterDatabase : public UObject {
+class JUSTFRAME_API UCharacterDatabase : public UObject {
   GENERATED_BODY()
 
 public:
   void LoadCharacterData(const TArray<FString> &CharacterCollections);
 
+  // Move access
   const FMoveData *FindMove(FName MoveID) const;
   const FMoveData *FindMoveByIndex(uint16 Index) const;
   uint16 GetMoveIndex(FName MoveID) const;
 
-  const FStanceData *FindStance(FString StanceId) const;
+  // Stance access
+  const FStanceData *FindStance(FName StanceId) const;
   const FStanceData *FindStanceByIndex(uint16 Index) const;
-  uint16 GetStanceIndex(FString StanceId) const;
+  uint16 GetStanceIndex(FName StanceId) const;
 
 private:
   void BuildMoveTables(const TArray<FMoveData> &Moves);
   void BuildStanceTables(const TArray<FStanceData> &Stances);
 
-  TUniquePtr<IMoveDataSource> DataSource;
-
+private:
+  // Moves
   TMap<FName, FMoveData> MoveMap;
   TArray<FMoveData> MoveList;
   TMap<FName, uint16> MoveIdToIndex;
 
-  TMap<FString, FStanceData> StanceMap;
+  // Stances
+  TMap<FName, FStanceData> StanceMap;
   TArray<FStanceData> StanceList;
-  TMap<FString, uint16> StanceIdToIndex;
+  TMap<FName, uint16> StanceIdToIndex;
 };

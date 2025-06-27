@@ -28,7 +28,7 @@ public:
 
   virtual const TArray<FString> &GetEnterFX() const { return StanceData.TransitionFX; }
   virtual const TArray<FString> &GetAvailableMoves() const { return StanceData.AvailableMoves; }
-  virtual const FString &GetStanceId() const { return StanceData.StanceId; }
+  virtual const FName &GetStanceId() const { return StanceData.StanceId; }
 
   const FCharacterState GetTargetSimData() const;
   int32 GetElapsedFrames() const { return ElapsedFrames; }

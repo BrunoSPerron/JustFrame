@@ -1,16 +1,16 @@
 // Every Frame is a Choice //
 #include "Characters/Stance/StanceInstanceFactory.h"
 
-TMap<FString, TFunction<TSharedPtr<FStanceInstance>(ARollbackCharacter *, const FStanceData &)>> &
+TMap<FName, TFunction<TSharedPtr<FStanceInstance>(ARollbackCharacter *, const FStanceData &)>> &
 UStanceInstanceFactory::GetRegistry() {
-  static TMap<FString,
+  static TMap<FName,
               TFunction<TSharedPtr<FStanceInstance>(ARollbackCharacter *, const FStanceData &)>>
       Registry;
   return Registry;
 }
 
 void UStanceInstanceFactory::Register(
-    const FString &StanceId,
+    const FName &StanceId,
     TFunction<TSharedPtr<FStanceInstance>(ARollbackCharacter *, const FStanceData &)> Constructor) {
   GetRegistry().Add(StanceId, MoveTemp(Constructor));
 }
