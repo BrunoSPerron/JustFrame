@@ -143,7 +143,7 @@ void UInputPollingService::PollControllers() {
     //UE_LOG(InputLog, Log, TEXT("PollControllers - Inputs: %s"), *PressedButton);
   }
   PrepareNextFrame();
-  UE_LOG(InputLog, Log, TEXT("UInputPollingService::PollControllers - end"));
+  //UE_LOG(InputLog, Log, TEXT("UInputPollingService::PollControllers - end"));
 }
 
 void UInputPollingService::HandleSDLEvent(const SDL_Event &Event) {
