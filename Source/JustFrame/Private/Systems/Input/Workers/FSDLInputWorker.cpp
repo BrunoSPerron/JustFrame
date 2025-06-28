@@ -1,5 +1,5 @@
 // Every Frame is a Choice //
-#include "Systems/Input/FSDLInputWorker.h"
+#include "Systems/Input/Workers/FSDLInputWorker.h"
 #include "HAL/PlatformProcess.h"
 
 FSDLInputWorker::FSDLInputWorker() : bIsRunning(false) {}
@@ -36,6 +36,7 @@ std::vector<SDL_JoystickID> FSDLInputWorker::GetJoysticks() const {
 void FSDLInputWorker::Start() {
 
 #if WITH_EDITOR
+  // Adding SDL3 on linux mess with the unreal editor
   if (GIsEditor && GIsPlayInEditorWorld) return;
 #endif
 

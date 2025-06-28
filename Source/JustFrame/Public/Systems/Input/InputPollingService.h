@@ -6,13 +6,14 @@
 #include <SDL3/SDL.h>
 #include "HAL/ThreadSafeBool.h"
 #include "Containers/Queue.h"
-#include "Systems/Input/FSDLInputWorker.h"
+#include "Systems/Input/Workers/FSDLInputWorker.h"
 #include "Systems/Input/IInputWorker.h"
 #include "InputPollingService.generated.h"
 
 class UInputBufferManager;
 class UPlayerSettingsManager;
 class URollbackSimulationManager;
+class FInputRouter;
 
 struct FSDLGamepadHandle {
   SDL_Gamepad *Controller = nullptr;
@@ -36,6 +37,7 @@ public:
             URollbackSimulationManager *InRollbackSimManager);
   void PollControllers();
   void HandleSDLEvent(const SDL_Event &Event);
+  void SetInputRouter(FInputRouter *InRouter) { InputRouter = InRouter; };
   void Shutdown();
 
 private:
@@ -51,4 +53,5 @@ private:
   TMap<Uint32, TSet<SDL_GamepadButton>> HeldAtFrameStart;
 
   TUniquePtr<IInputWorker> SDLWorker;
+  FInputRouter *InputRouter = nullptr;
 };

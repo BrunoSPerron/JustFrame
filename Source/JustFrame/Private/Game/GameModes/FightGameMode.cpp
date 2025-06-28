@@ -15,18 +15,23 @@ AFightGameMode::AFightGameMode() {
 void AFightGameMode::BeginPlay() {
   Super::BeginPlay();
 
+  // Sync framerate with simulation (Imperfect fix)
+  if (GEngine) GEngine->Exec(nullptr, TEXT("t.MaxFPS 60"));
+
   ForTestOnly_Autosetup();
+  GameManagerSubsystem->SetGlobalInputMode(EInputMode::Fight);
+
   ResetSimulationTimer(TickRate);
 }
 
 void AFightGameMode::PauseSimulation() {
   bSimulationPaused = true;
-  UE_LOG(LogTemp, Log, TEXT("Simulation paused."));
+  UE_LOG(LogTemp, Log, TEXT("AFightGameMode::PauseSimulation Simulation paused."));
 }
 
 void AFightGameMode::UnpauseSimulation() {
   bSimulationPaused = false;
-  UE_LOG(LogTemp, Log, TEXT("Simulation unpaused."));
+  UE_LOG(LogTemp, Log, TEXT("AFightGameMode::UnpauseSimulation Simulation unpaused."));
 }
 
 void AFightGameMode::ResetSimulationTimer(float NewRate) {
@@ -46,17 +51,14 @@ void AFightGameMode::ResetSimulationTimer(float NewRate) {
 bool AFightGameMode::TickSimulation(float DeltaTime) {
   if (bSimulationPaused || !GameManagerSubsystem) return true;
 
-  if (URollbackSimulationManager *SimManager = GameManagerSubsystem->GetRollbackSimManager()) {
-    SimManager->AdvanceSimulation();
-  } else {
-    UE_LOG(LogTemp, Log, TEXT("No URollbackSimulationManager instances found in scene"));
-  }
+  URollbackSimulationManager *SimManager = GameManagerSubsystem->GetRollbackSimManager();
+  checkf(SimManager, TEXT("AFightGameMode::TickSimulation: No URollbackSimulationManager found"));
+  SimManager->AdvanceSimulation();
 
-  if (UInputPollingService *InputPollingService = GameManagerSubsystem->GetInputPollingService()) {
-    InputPollingService->PollControllers();
-  } else {
-    UE_LOG(LogTemp, Log, TEXT("No UInputPollingService instances found in scene"));
-  }
+  UInputPollingService *InputPollingService = GameManagerSubsystem->GetInputPollingService();
+  checkf(InputPollingService,
+         TEXT("AFightGameMode::TickSimulation: No UInputPollingService found"));
+  InputPollingService->PollControllers();
 
   return true;
 }
@@ -75,7 +77,9 @@ void AFightGameMode::ForTestOnly_Autosetup() {
   }
 
   if (Characters.Num() == 0) {
-    UE_LOG(LogTemp, Error, TEXT("No ARollbackCharacter instances found in scene."));
+    UE_LOG(LogTemp, Error,
+           TEXT("AFightGameMode::ForTestOnly_Autosetup No ARollbackCharacter instances found in "
+                "scene."));
     return;
   }
 
@@ -96,6 +100,8 @@ void AFightGameMode::ForTestOnly_Autosetup() {
     PC->SetViewTarget(Cam);
   }
 
-  UE_LOG(LogTemp, Log, TEXT("GameManagerSubsystem initialized with %d characters."),
+  UE_LOG(LogTemp, Log,
+         TEXT("AFightGameMode::ForTestOnly_Autosetup GameManagerSubsystem initialized with %d "
+              "characters."),
          Characters.Num());
 }

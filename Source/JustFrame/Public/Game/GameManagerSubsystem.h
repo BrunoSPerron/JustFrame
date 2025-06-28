@@ -3,6 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "Systems/Input/InputRouter.h"
 #include "GameManagerSubsystem.generated.h"
 
 class ARollbackCharacter;
@@ -28,22 +29,27 @@ public:
   UPlayerSettingsManager *GetPlayerSettingsManager() const { return PlayerSettingsManager; }
   URollbackSimulationManager *GetRollbackSimManager() const { return RollbackSimManager; }
   UCharacterDatabase *GetCharacterDatabase() const { return CharacterDatabase; }
+  FInputRouter *GetInputRouter() const { return InputRouter.Get(); }
 
   void SetupManagers(uint8 NumPlayers, const TArray<ARollbackCharacter *> &Characters);
+  void SetInputMode(uint8 PlayerID, EInputMode NewMode);
+  void SetGlobalInputMode(EInputMode NewMode);
 
 private:
   UPROPERTY()
-  UInputBufferManager *InputBufferManager;
+  UInputBufferManager *InputBufferManager = nullptr;
 
   UPROPERTY()
-  UInputPollingService *InputPollingService;
+  UInputPollingService *InputPollingService = nullptr;
 
   UPROPERTY()
-  UPlayerSettingsManager *PlayerSettingsManager;
+  UPlayerSettingsManager *PlayerSettingsManager = nullptr;
 
   UPROPERTY()
-  URollbackSimulationManager *RollbackSimManager;
+  URollbackSimulationManager *RollbackSimManager = nullptr;
 
   UPROPERTY()
-  UCharacterDatabase *CharacterDatabase;
+  UCharacterDatabase *CharacterDatabase = nullptr;
+
+  TUniquePtr<FInputRouter> InputRouter;
 };

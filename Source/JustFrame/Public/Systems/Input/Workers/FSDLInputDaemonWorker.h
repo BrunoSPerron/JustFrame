@@ -1,7 +1,7 @@
 // Every Frame is a Choice //
 #pragma once
 
-#include "IInputWorker.h"
+#include "Systems/Input/IInputWorker.h"
 #include <atomic>
 #include <condition_variable>
 #include <queue>

@@ -44,6 +44,7 @@ public:
   TMap<SDL_JoystickID, uint8> GetJoystickToPlayer() const;
 
   FInputMapping GetDefaultInputMapping() const;
+  int32 GetNumPlayers() const { return PlayerSettingsMap.Num(); }
 
   bool OnControllerConnected(SDL_JoystickID JoystickID);
   bool OnControllerDisconnected(SDL_JoystickID JoystickID);

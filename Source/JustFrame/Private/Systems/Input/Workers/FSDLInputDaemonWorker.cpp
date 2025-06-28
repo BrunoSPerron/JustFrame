@@ -1,5 +1,5 @@
 // Every Frame is a Choice //
-#include "Systems/Input/FSDLInputDaemonWorker.h"
+#include "Systems/Input/Workers/FSDLInputDaemonWorker.h"
 #include "Data/LogCategories.h"
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -170,17 +170,17 @@ void FSDLInputDaemonWorker::HandleSDLEventFrame(uint32_t FrameSize) {
 
 void FSDLInputDaemonWorker::HandleJoystickListUpdate(uint32_t FrameSize) {
   if (FrameSize > sizeof(FJoystickListUpdate)) {
-    UE_LOG(
-        InputLog, Warning,
-        TEXT("FSDLInputDaemonWorker::HandleSDLEventFrame() JoystickListUpdate frame too large: %u"),
-        FrameSize);
+    UE_LOG(InputLog, Warning,
+           TEXT("FSDLInputDaemonWorker::HandleJoystickListUpdate JoystickListUpdate frame too "
+                "large: %u"),
+           FrameSize);
     return;
   }
 
   FJoystickListUpdate Payload;
   if (!ReadFull(SocketFD, &Payload, FrameSize)) {
     UE_LOG(InputLog, Warning,
-           TEXT("FSDLInputDaemonWorker::HandleSDLEventFrame() Failed to read JoystickListUpdate "
+           TEXT("FSDLInputDaemonWorker::HandleJoystickListUpdate Failed to read JoystickListUpdate "
                 "payload."));
     return;
   }

@@ -6,10 +6,11 @@
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Systems/Input/InputBufferManager.h"
-#include "Systems/Input/FSDLInputDaemonWorker.h"
+#include "Systems/Input/Workers/FSDLInputDaemonWorker.h"
 #include "Systems/Player/PlayerSettingsManager.h"
 #include <SDL3/SDL.h>
 #include "Systems/Rollback/RollbackSimulationManager.h"
+#include "Systems/Input/InputRouter.h"
 
 void UInputPollingService::Init(UInputBufferManager *InBufferManager,
                                 UPlayerSettingsManager *InPlayerSettings,
@@ -25,11 +26,14 @@ void UInputPollingService::Init(UInputBufferManager *InBufferManager,
 
   if (access(SocketPath, F_OK) == 0) {
     SDLWorker = MakeUnique<FSDLInputDaemonWorker>(FString(SocketPath));
-    UE_LOG(InputLog, Log, TEXT("Using SDLInputDaemonWorker via socket: %s"), *FString(SocketPath));
+    UE_LOG(InputLog, Log,
+           TEXT("UInputPollingService::Init Using SDLInputDaemonWorker via socket: %s"),
+           *FString(SocketPath));
   } else {
 #if WITH_EDITOR
     UE_LOG(InputLog, Warning,
-           TEXT("SDLInputDaemon not found at %s — waiting for daemon to launch..."),
+           TEXT("UInputPollingService::Init SDLInputDaemon not found at %s — waiting for daemon to "
+                "launch..."),
            *FString(SocketPath));
 
     bool bSocketExists = false;
@@ -38,12 +42,14 @@ void UInputPollingService::Init(UInputBufferManager *InBufferManager,
       bSocketExists = access(SocketPath, F_OK) == 0;
     }
 
-    UE_LOG(InputLog, Log, TEXT("...SDLInputDaemon detected after wait."));
+    UE_LOG(InputLog, Log,
+           TEXT("UInputPollingService::Init ...SDLInputDaemon detected after wait."));
     SDLWorker = MakeUnique<FSDLInputDaemonWorker>(FString(SocketPath));
 
 #else
     SDLWorker = MakeUnique<FSDLInputWorker>();
-    UE_LOG(InputLog, Log, TEXT("Using FSDLInputWorker (no daemon detected)."));
+    UE_LOG(InputLog, Log,
+           TEXT("UInputPollingService::Init Using FSDLInputWorker (no daemon detected)."));
 #endif
   }
 
@@ -53,10 +59,10 @@ void UInputPollingService::Init(UInputBufferManager *InBufferManager,
   std::vector<SDL_JoystickID> joysticks = SDLWorker->GetJoysticks();
   for (SDL_JoystickID id : joysticks) {
     PlayerSettingsManager->OnControllerConnected(id);
-    UE_LOG(InputLog, Log, TEXT("Gamepad %d initialized on startup"), id);
+    UE_LOG(InputLog, Log, TEXT("UInputPollingService::Init Gamepad %d initialized on startup"), id);
   }
 
-  UE_LOG(LogTemp, Log, TEXT("InputPollingService initialized with SDLWorker ptr: %p"),
+  UE_LOG(LogTemp, Log, TEXT("UInputPollingService::Init initialized with SDLWorker ptr: %p"),
          SDLWorker.Get());
 }
 
@@ -68,17 +74,17 @@ void UInputPollingService::PrepareNextFrame() {
 
 void UInputPollingService::PollControllers() {
   uint32 CurrentFrame = RollbackSimManager->GetCurrentFrame();
-  /*UE_LOG(InputLog, Log, TEXT("PollControllers - Frame %u start"), CurrentFrame);
+  /*UE_LOG(InputLog, Log, TEXT("UInputPollingService::PollControllers - Frame %u start"), CurrentFrame);
 
   if (!SDLWorker) {
-    UE_LOG(LogTemp, Error, TEXT("[Polling] SDLWorker is null!"));
+    UE_LOG(LogTemp, Error, TEXT("UInputPollingService::PollControllers SDLWorker is null!"));
   } else {
-    UE_LOG(LogTemp, Log, TEXT("[Polling] SDLWorker is valid at frame %u"), CurrentFrame);
+    UE_LOG(LogTemp, Log, TEXT("UInputPollingService::PollControllers SDLWorker is valid at frame %u"), CurrentFrame);
   }*/
 
   SDL_Event Event;
   /*bool bGotEvent = SDLWorker->Dequeue(Event);
-  UE_LOG(LogTemp, Log, TEXT("[Polling] Initial Dequeue call returned: %s"),
+  UE_LOG(LogTemp, Log, TEXT("UInputPollingService::PollControllers Initial Dequeue call returned: %s"),
          bGotEvent ? TEXT("true") : TEXT("false"));
   if (bGotEvent) HandleSDLEvent(Event);*/
   while (SDLWorker->Dequeue(Event)) {
@@ -131,27 +137,30 @@ void UInputPollingService::PollControllers() {
         PressedButton += BitName + ",";*/
       }
     }
-
-    InputBufferManager->InjectInput(PlayerID, InputMask, CurrentFrame);
+    if (InputRouter) {
+      InputRouter->Route(JoyID, Held, Pressed, Released, CurrentFrame);
+    }
     //UE_LOG(InputLog, Log, TEXT("PollControllers - Inputs: %s"), *PressedButton);
   }
   PrepareNextFrame();
-  // UE_LOG(InputLog, Log, TEXT("PollControllers - end"));
+  UE_LOG(InputLog, Log, TEXT("UInputPollingService::PollControllers - end"));
 }
 
 void UInputPollingService::HandleSDLEvent(const SDL_Event &Event) {
-  //UE_LOG(InputLog, Log, TEXT("HandleSDLEvent"));
+  //UE_LOG(InputLog, Log, TEXT("UInputPollingService::HandleSDLEvent"));
   switch (Event.type) {
     case SDL_EVENT_GAMEPAD_ADDED:
       SDLWorker->HandleConnected(Event);
       PlayerSettingsManager->OnControllerConnected(Event.gdevice.which);
-      UE_LOG(InputLog, Log, TEXT("Gamepad %d connected"), Event.gdevice.which);
+      UE_LOG(InputLog, Log, TEXT("UInputPollingService::HandleSDLEvent Gamepad %d connected"),
+             Event.gdevice.which);
       break;
 
     case SDL_EVENT_GAMEPAD_REMOVED:
       SDLWorker->HandleDisconnected(Event);
       PlayerSettingsManager->OnControllerDisconnected(Event.gdevice.which);
-      UE_LOG(InputLog, Log, TEXT("Gamepad %d disconnected"), Event.gdevice.which);
+      UE_LOG(InputLog, Log, TEXT("UInputPollingService::HandleSDLEvent Gamepad %d disconnected"),
+             Event.gdevice.which);
       break;
 
     case SDL_EVENT_GAMEPAD_BUTTON_DOWN: {
