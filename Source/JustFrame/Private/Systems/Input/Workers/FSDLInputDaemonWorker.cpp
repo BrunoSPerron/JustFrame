@@ -31,12 +31,10 @@ void FSDLInputDaemonWorker::Stop() {
 bool FSDLInputDaemonWorker::Dequeue(SDL_Event &OutEvent) {
   std::unique_lock<std::mutex> Lock(QueueMutex);
   if (EventQueue.empty()) {
-    //UE_LOG(InputLog, Log, TEXT("FSDLInputDaemonWorker::Dequeue() Queue is empty"));
     return false;
   }
   OutEvent = EventQueue.front();
   EventQueue.pop();
-  //UE_LOG(InputLog, Log, TEXT("FSDLInputDaemonWorker::Dequeue() Event type %u dequeued"), OutEvent.type);
   return true;
 }
 
@@ -161,11 +159,6 @@ void FSDLInputDaemonWorker::HandleSDLEventFrame(uint32_t FrameSize) {
     std::lock_guard<std::mutex> Lock(QueueMutex);
     EventQueue.push(Event);
   }
-
-  /*UE_LOG(InputLog, Log, TEXT("FSDLInputDaemonWorker::HandleSDLEventFrame() Enqueued SDL_Event type: %u (SourceID: %d)"), Event.type,
-         SourceID);*/
-
-  DataAvailable.notify_one();
 }
 
 void FSDLInputDaemonWorker::HandleJoystickListUpdate(uint32_t FrameSize) {

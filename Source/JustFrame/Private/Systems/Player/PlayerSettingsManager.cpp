@@ -2,13 +2,13 @@
 #include "Systems/Player/PlayerSettingsManager.h"
 #include <SDL3/SDL.h>
 
-void UPlayerSettingsManager::Init(int32 NumPlayers) {
-  PlayerSettingsMap.Empty();
+void UPlayerSettingsManager::Init() {
+  PlayerSettingsList.Empty();
 
-  for (uint8 PlayerID = 0; PlayerID < NumPlayers; ++PlayerID) {
+  for (uint8 PlayerID : GetActivePlayerIDs()) {
     FPlayerSettings Settings;
     Settings.InputMap = GetDefaultInputMapping();
-    PlayerSettingsMap.Add(PlayerID, Settings);
+    PlayerSettingsList.Add(Settings);
   }
 }
 
@@ -37,10 +37,10 @@ FInputMapping UPlayerSettingsManager::GetDefaultInputMapping() const {
 }
 
 TOptional<uint8> UPlayerSettingsManager::GetPlayerIDForJoystick(SDL_JoystickID JoystickID) const {
-  for (const TPair<uint8, FPlayerSettings> &Elem : PlayerSettingsMap) {
-    const FPlayerControllerInfo &Info = Elem.Value.ControllerInfo;
+  for (int32 i = 0; i < PlayerSettingsList.Num(); ++i) {
+    const FPlayerControllerInfo &Info = PlayerSettingsList[i].ControllerInfo;
     if (Info.bIsConnected && Info.JoystickID == JoystickID) {
-      return Elem.Key;
+      return static_cast<uint8>(i);
     }
   }
   return {};
@@ -48,38 +48,71 @@ TOptional<uint8> UPlayerSettingsManager::GetPlayerIDForJoystick(SDL_JoystickID J
 
 TMap<SDL_JoystickID, uint8> UPlayerSettingsManager::GetJoystickToPlayer() const {
   TMap<SDL_JoystickID, uint8> Result;
-  for (const TPair<uint8, FPlayerSettings> &Elem : PlayerSettingsMap) {
-    const FPlayerControllerInfo &Info = Elem.Value.ControllerInfo;
+  for (int32 i = 0; i < PlayerSettingsList.Num(); ++i) {
+    const FPlayerControllerInfo &Info = PlayerSettingsList[i].ControllerInfo;
     if (Info.bIsConnected && Info.JoystickID != -1) {
-      Result.Add(Info.JoystickID, Elem.Key);
+      Result.Add(Info.JoystickID, static_cast<uint8>(i));
     }
   }
   return Result;
 }
 
+TOptional<SDL_JoystickID> UPlayerSettingsManager::GetJoystickIDForPlayer(uint8 PlayerID) const {
+  if (PlayerSettingsList.IsValidIndex(PlayerID)) {
+    const FPlayerSettings &Settings = PlayerSettingsList[PlayerID];
+    if (Settings.ControllerInfo.bIsConnected) return Settings.ControllerInfo.JoystickID;
+  }
+  return {};
+}
+
+TArray<uint8> UPlayerSettingsManager::GetActivePlayerIDs() const {
+  TArray<uint8> Result;
+  for (int32 i = 0; i < PlayerSettingsList.Num(); ++i) {
+    if (PlayerSettingsList[i].ControllerInfo.bIsConnected) Result.Add(static_cast<uint8>(i));
+  }
+  return Result;
+}
+
 bool UPlayerSettingsManager::OnControllerConnected(SDL_JoystickID JoystickID) {
-  for (TPair<uint8, FPlayerSettings> &Elem : PlayerSettingsMap) {
-    FPlayerSettings &Settings = Elem.Value;
+  UE_LOG(LogTemp, Log, TEXT("OnControllerConnected called with JoystickID: %d"), JoystickID);
+  // Check if this joystick is already mapped
+  for (int32 i = 0; i < PlayerSettingsList.Num(); ++i) {
+    if (PlayerSettingsList[i].ControllerInfo.bIsConnected &&
+        PlayerSettingsList[i].ControllerInfo.JoystickID == JoystickID)
+      return false;
+  }
+  // Try to reuse a disconnected player slot
+  for (int32 i = 0; i < PlayerSettingsList.Num(); ++i) {
+    FPlayerSettings &Settings = PlayerSettingsList[i];
     if (!Settings.ControllerInfo.bIsConnected) {
-      Settings.ControllerInfo.PlayerID = Elem.Key;
       Settings.ControllerInfo.JoystickID = JoystickID;
       Settings.ControllerInfo.bIsConnected = true;
-      UE_LOG(LogTemp, Warning,
-             TEXT("UPlayerSettingsManager Joystick connected: Player %u, Stick: %u"), Elem.Key,
+      UE_LOG(LogTemp, Log,
+             TEXT("UPlayerSettingsManager Joystick reconnected: Player %d, Stick: %d"), i,
              JoystickID);
       return true;
     }
   }
-  return false;
+  // No free slot, create a new player
+  FPlayerSettings Settings;
+  Settings.InputMap = GetDefaultInputMapping();
+  Settings.ControllerInfo.PlayerID = PlayerSettingsList.Num();
+  Settings.ControllerInfo.JoystickID = JoystickID;
+  Settings.ControllerInfo.bIsConnected = true;
+  PlayerSettingsList.Add(Settings);
+  UE_LOG(LogTemp, Log, TEXT("UPlayerSettingsManager Joystick connected: Player %d, Stick: %d"),
+         PlayerSettingsList.Num() - 1, JoystickID);
+  return true;
 }
 
 bool UPlayerSettingsManager::OnControllerDisconnected(SDL_JoystickID JoystickID) {
-  for (TPair<uint8, FPlayerSettings> &Elem : PlayerSettingsMap) {
-    FPlayerSettings &Settings = Elem.Value;
+  for (int32 i = 0; i < PlayerSettingsList.Num(); ++i) {
+    FPlayerSettings &Settings = PlayerSettingsList[i];
     if (Settings.ControllerInfo.bIsConnected && Settings.ControllerInfo.JoystickID == JoystickID) {
-      Settings.ControllerInfo = {};
+      Settings.ControllerInfo.bIsConnected = false;
+      Settings.ControllerInfo.JoystickID = -1;
       UE_LOG(LogTemp, Warning,
-             TEXT("UPlayerSettingsManager Joystick disconnected: Player %u, Stick: %u"), Elem.Key,
+             TEXT("UPlayerSettingsManager Joystick disconnected: Player %d, Stick: %d"), i,
              JoystickID);
       return true;
     }
@@ -88,9 +121,13 @@ bool UPlayerSettingsManager::OnControllerDisconnected(SDL_JoystickID JoystickID)
 }
 
 const FInputMapping &UPlayerSettingsManager::GetInputMapping(uint8 PlayerID) const {
-  const FPlayerSettings *Settings = PlayerSettingsMap.Find(PlayerID);
-  if (Settings) return Settings->InputMap;
-
+  if (PlayerSettingsList.IsValidIndex(PlayerID)) {
+    return PlayerSettingsList[PlayerID].InputMap;
+  }
   DefaultInputMappingCache = GetDefaultInputMapping();
   return DefaultInputMappingCache;
+}
+
+const FInputMapping &UPlayerSettingsManager::GetMenuInputMapping(uint8 PlayerID) const {
+  return GetInputMapping(PlayerID);
 }

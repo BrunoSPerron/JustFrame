@@ -31,7 +31,9 @@ public:
   UCharacterDatabase *GetCharacterDatabase() const { return CharacterDatabase; }
   FInputRouter *GetInputRouter() const { return InputRouter.Get(); }
 
-  void SetupManagers(uint8 NumPlayers, const TArray<ARollbackCharacter *> &Characters);
+  void SetupCore(uint8 NumPlayers);
+  void SetupFight(const TArray<ARollbackCharacter *> &Characters,
+                  const TMap<uint8, int32> &PlayerToCharacter);
   void SetInputMode(uint8 PlayerID, EInputMode NewMode);
   void SetGlobalInputMode(EInputMode NewMode);
 

@@ -37,20 +37,24 @@ class JUSTFRAME_API UPlayerSettingsManager : public UObject {
   GENERATED_BODY()
 
 public:
-  void Init(int32 NumPlayers);
+  void Init();
 
   const FInputMapping &GetInputMapping(uint8 PlayerID) const;
+  const FInputMapping &GetMenuInputMapping(uint8 PlayerID) const;
+
   TOptional<uint8> GetPlayerIDForJoystick(SDL_JoystickID JoystickID) const;
+  TOptional<SDL_JoystickID> GetJoystickIDForPlayer(uint8 PlayerID) const;
   TMap<SDL_JoystickID, uint8> GetJoystickToPlayer() const;
 
   FInputMapping GetDefaultInputMapping() const;
-  int32 GetNumPlayers() const { return PlayerSettingsMap.Num(); }
+  int32 GetNumPlayers() const { return PlayerSettingsList.Num(); }
+  TArray<uint8> GetActivePlayerIDs() const;
 
   bool OnControllerConnected(SDL_JoystickID JoystickID);
   bool OnControllerDisconnected(SDL_JoystickID JoystickID);
 
 private:
   mutable FInputMapping DefaultInputMappingCache;
-  TMap<uint8, FPlayerSettings> PlayerSettingsMap;
+  TArray<FPlayerSettings> PlayerSettingsList;
   void ForTestOnly_Autosetup();
 };

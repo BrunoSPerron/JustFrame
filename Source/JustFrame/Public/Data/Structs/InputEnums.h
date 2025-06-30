@@ -13,3 +13,11 @@ enum class EInputBit : uint16 {
   Guard = 1 << 8,
   Step = 1 << 9,
 };
+
+enum class EMenuInputBit : uint16 {
+  Up = 1 << 0,
+  Down = 1 << 1,
+  Left = 1 << 2,
+  Right = 1 << 3,
+  Confirm = 1 << 4,
+};

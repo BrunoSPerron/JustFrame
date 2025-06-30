@@ -12,7 +12,6 @@
 
 class UInputBufferManager;
 class UPlayerSettingsManager;
-class URollbackSimulationManager;
 class FInputRouter;
 
 struct FSDLGamepadHandle {
@@ -33,8 +32,7 @@ class JUSTFRAME_API UInputPollingService : public UObject {
   GENERATED_BODY()
 
 public:
-  void Init(UInputBufferManager *InBufferManager, UPlayerSettingsManager *InPlayerSettings,
-            URollbackSimulationManager *InRollbackSimManager);
+  void Init(UInputBufferManager *InBufferManager, UPlayerSettingsManager *InPlayerSettings);
   void PollControllers();
   void HandleSDLEvent(const SDL_Event &Event);
   void SetInputRouter(FInputRouter *InRouter) { InputRouter = InRouter; };
@@ -43,7 +41,6 @@ public:
 private:
   UPROPERTY() UInputBufferManager *InputBufferManager;
   UPROPERTY() UPlayerSettingsManager *PlayerSettingsManager;
-  UPROPERTY() URollbackSimulationManager *RollbackSimManager;
 
   void PrepareNextFrame();
 

@@ -25,27 +25,22 @@ void UGameManagerSubsystem::Deinitialize() {
   InputRouter.Reset();
 }
 
-void UGameManagerSubsystem::SetupManagers(uint8 NumPlayers,
-                                          const TArray<ARollbackCharacter *> &Characters) {
+void UGameManagerSubsystem::SetupCore(uint8 NumPlayers) {
   UGameInstance *GameInstance = GetGameInstance();
-  if (!InputBufferManager) {
-    InputBufferManager = NewObject<UInputBufferManager>(this);
-    InputBufferManager->Init(NumPlayers);
-  }
 
   if (!PlayerSettingsManager) {
     PlayerSettingsManager = NewObject<UPlayerSettingsManager>(this);
-    PlayerSettingsManager->Init(NumPlayers);
+    PlayerSettingsManager->Init();
   }
 
-  if (!RollbackSimManager) {
-    RollbackSimManager = NewObject<URollbackSimulationManager>(this);
-    RollbackSimManager->Init(Characters, InputBufferManager);
+  if (!InputBufferManager) {
+    InputBufferManager = NewObject<UInputBufferManager>(this);
+    InputBufferManager->Init(PlayerSettingsManager);
   }
 
   if (!InputPollingService) {
     InputPollingService = NewObject<UInputPollingService>(this);
-    InputPollingService->Init(InputBufferManager, PlayerSettingsManager, RollbackSimManager);
+    InputPollingService->Init(InputBufferManager, PlayerSettingsManager);
   }
 
   if (!CharacterDatabase) {
@@ -56,12 +51,28 @@ void UGameManagerSubsystem::SetupManagers(uint8 NumPlayers,
 
   if (!InputRouter) {
     InputRouter = MakeUnique<FInputRouter>(PlayerSettingsManager);
-    InputRouter->RegisterConsumer(EInputMode::Menu, MakeShared<FMenuInputConsumer>());
-    InputRouter->RegisterConsumer(
-        EInputMode::Fight,
-        MakeShared<FFightInputConsumer>(InputBufferManager, PlayerSettingsManager));
+    InputRouter->RegisterConsumer(EInputMode::Menu, MakeShared<FMenuInputConsumer>(
+                                                        InputBufferManager, PlayerSettingsManager));
   }
   InputPollingService->SetInputRouter(InputRouter.Get());
+}
+
+void UGameManagerSubsystem::SetupFight(const TArray<ARollbackCharacter *> &Characters,
+                                       const TMap<uint8, int32> &PlayerToCharacter) {
+  if (!InputBufferManager || !PlayerSettingsManager || !InputPollingService || !InputRouter) {
+    UE_LOG(LogTemp, Error,
+           TEXT("SetupFight called before SetupCore! Core systems must be initialized first."));
+    return;
+  }
+
+  if (!RollbackSimManager) {
+    RollbackSimManager = NewObject<URollbackSimulationManager>(this);
+    RollbackSimManager->Init(Characters, InputBufferManager, PlayerToCharacter);
+  }
+
+  InputRouter->RegisterConsumer(
+      EInputMode::Fight, MakeShared<FFightInputConsumer>(InputBufferManager, PlayerSettingsManager,
+                                                         RollbackSimManager));
 }
 
 void UGameManagerSubsystem::SetInputMode(uint8 PlayerID, EInputMode NewMode) {

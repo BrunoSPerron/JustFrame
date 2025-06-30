@@ -45,7 +45,6 @@ private:
 
   int SocketFD = -1;
   std::mutex QueueMutex;
-  std::condition_variable DataAvailable;
   std::queue<SDL_Event> EventQueue;
 
   std::unordered_set<SDL_JoystickID> ConnectedJoysticks;

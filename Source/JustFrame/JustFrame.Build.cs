@@ -18,11 +18,11 @@ public class JustFrame : ModuleRules {
 
     // Core engine dependencies
     PublicDependencyModuleNames.AddRange(new string[] {
-      "Core", "CoreUObject", "Engine", "Json", "JsonUtilities", "OpenSSL"
+      "Core", "CoreUObject", "Engine", "Json", "JsonUtilities"
     });
 
     PrivateDependencyModuleNames.AddRange(new string[] {
-      
+      "OpenSSL", "UMG"
     });
 
     // Editor-specific modules

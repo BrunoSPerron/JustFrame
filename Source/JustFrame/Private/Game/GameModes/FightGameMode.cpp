@@ -5,6 +5,7 @@
 #include "Game/GameManagerSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Systems/Input/InputPollingService.h"
+#include "Systems/Player/PlayerSettingsManager.h"
 #include "Systems/Rollback/RollbackSimulationManager.h"
 
 AFightGameMode::AFightGameMode() {
@@ -15,7 +16,7 @@ AFightGameMode::AFightGameMode() {
 void AFightGameMode::BeginPlay() {
   Super::BeginPlay();
 
-  // Sync framerate with simulation (Imperfect fix)
+  // Sync framerate with simulation (Imperfect fix, temporary)
   if (GEngine) GEngine->Exec(nullptr, TEXT("t.MaxFPS 60"));
 
   ForTestOnly_Autosetup();
@@ -88,7 +89,15 @@ void AFightGameMode::ForTestOnly_Autosetup() {
     Characters[i]->SetCharacterIndex(i);
   }
 
-  GameManagerSubsystem->SetupManagers(Characters.Num(), Characters);
+  GameManagerSubsystem->SetupCore(Characters.Num());
+
+  // TEMPORARY: map PlayerIDs to character indices in order
+  TArray<uint8> PlayerIDs = GameManagerSubsystem->GetPlayerSettingsManager()->GetActivePlayerIDs();
+  TMap<uint8, int32> PlayerToCharacter;
+  for (int32 i = 0; i < PlayerIDs.Num() && i < Characters.Num(); ++i) {
+    PlayerToCharacter.Add(PlayerIDs[i], i);
+  }
+  GameManagerSubsystem->SetupFight(Characters, PlayerToCharacter);
 
   if (Characters.Num() == 2) {
     Characters[0]->SetTargetCharacter(Characters[1]);

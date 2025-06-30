@@ -5,6 +5,7 @@
 #include "UObject/NoExportTypes.h"
 #include "Systems/Input/InputBufferManager.h"
 #include "Characters/RollbackCharacter.h"
+#include "Containers/Map.h"
 #include "RollbackSimulationManager.generated.h"
 
 USTRUCT()
@@ -20,7 +21,8 @@ class JUSTFRAME_API URollbackSimulationManager : public UObject {
   GENERATED_BODY()
 
 public:
-  void Init(TArray<ARollbackCharacter *> InCharacters, UInputBufferManager *InInputBufferManager);
+  void Init(TArray<ARollbackCharacter *> InCharacters, UInputBufferManager *InInputBufferManager,
+            TMap<uint8, int32> InPlayerToCharacter);
   void AdvanceSimulation();
 
   FORCEINLINE uint32 GetCurrentFrame() const { return CurrentFrame; }
@@ -34,6 +36,7 @@ private:
   uint32 CurrentFrame = 0;
   TMap<uint32, FFrameSnapshot> FrameSnapshots;
   UInputBufferManager *InputBuffer;
+  TMap<uint8, int32> PlayerToCharacter;
 
   void SaveSnapshot(uint32 Frame);
 };

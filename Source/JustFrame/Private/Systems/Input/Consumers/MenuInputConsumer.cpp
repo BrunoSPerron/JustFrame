@@ -1,13 +1,20 @@
 // Every Frame is a Choice //
 #include "Systems/Input/Consumers/MenuInputConsumer.h"
+#include "Systems/Input/InputBufferManager.h"
+#include "Systems/Player/PlayerSettingsManager.h"
 #include "Data/LogCategories.h"
 
-void FMenuInputConsumer::ConsumeInput(SDL_JoystickID JoyID, const TSet<SDL_GamepadButton> &Held,
+void FMenuInputConsumer::ConsumeInput(uint8 PlayerID, const TSet<SDL_GamepadButton> &Held,
                                       const TSet<SDL_GamepadButton> &Pressed,
-                                      const TSet<SDL_GamepadButton> &Released, uint32 Frame) {
-  for (SDL_GamepadButton Button : Pressed) {
-    FString Name = UTF8_TO_TCHAR(SDL_GetGamepadStringForButton(Button));
-    UE_LOG(InputLog, Log, TEXT("FMenuInputConsumer::ConsumeInput JoyID: %d - Pressed: %s"), JoyID,
-           *Name);
+                                      const TSet<SDL_GamepadButton> &Released) {
+  const FInputMapping &InputMap = PlayerSettings->GetMenuInputMapping(PlayerID);
+
+  uint16 InputMask = 0;
+  for (const TPair<SDL_GamepadButton, uint16> &Pair : InputMap.SDLButtonToBitMask) {
+    const SDL_GamepadButton Button = Pair.Key;
+    const uint16 Bit = Pair.Value;
+    if (Pressed.Contains(Button)) InputMask |= Bit;
   }
+
+  InputBufferManager->SetUnbufferedInput(PlayerID, InputMask);
 }

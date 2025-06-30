@@ -21,9 +21,8 @@ public:
 
   void RegisterConsumer(EInputMode Mode, TSharedPtr<IInputConsumer> Consumer);
 
-  void Route(SDL_JoystickID JoyID, const TSet<SDL_GamepadButton> &Held,
-             const TSet<SDL_GamepadButton> &Pressed, const TSet<SDL_GamepadButton> &Released,
-             uint32 Frame);
+  void Route(uint8 PlayerID, const TSet<SDL_GamepadButton> &Held,
+             const TSet<SDL_GamepadButton> &Pressed, const TSet<SDL_GamepadButton> &Released);
 
 private:
   TMap<EInputMode, TSharedPtr<IInputConsumer>> Consumers;

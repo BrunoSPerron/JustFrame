@@ -24,32 +24,20 @@ void FInputRouter::RegisterConsumer(EInputMode Mode, TSharedPtr<IInputConsumer> 
   Consumers.Add(Mode, Consumer);
 }
 
-void FInputRouter::Route(SDL_JoystickID JoyID, const TSet<SDL_GamepadButton> &Held,
+void FInputRouter::Route(uint8 PlayerID, const TSet<SDL_GamepadButton> &Held,
                          const TSet<SDL_GamepadButton> &Pressed,
-                         const TSet<SDL_GamepadButton> &Released, uint32 Frame) {
+                         const TSet<SDL_GamepadButton> &Released) {
   if (!PlayerSettingsManager) {
     UE_LOG(InputLog, Warning, TEXT("FInputRouter::Route PlayerSettingsManager is null"));
     return;
   }
 
-  const TMap<SDL_JoystickID, uint8> &Mapping = PlayerSettingsManager->GetJoystickToPlayer();
-  const uint8 *PlayerIDPtr = Mapping.Find(JoyID);
-  if (!PlayerIDPtr) {
-    UE_LOG(InputLog, Warning, TEXT("FInputRouter::Route Unknown JoyID %d"), JoyID);
-    return;
-  }
-
-  const uint8 PlayerID = *PlayerIDPtr;
   const EInputMode *ModePtr = PlayerInputModes.Find(PlayerID);
   const EInputMode Mode = ModePtr ? *ModePtr : EInputMode::Menu;
 
-  /*UE_LOG(InputLog, Log, TEXT("Route: Player %d | Mode: %d | Frame: %u"), PlayerID, (int32)Mode,
-         Frame);*/
-
   if (const TSharedPtr<IInputConsumer> *Consumer = Consumers.Find(Mode)) {
     if (Consumer->IsValid()) {
-      //UE_LOG(InputLog, Verbose, TEXT("Route: Forwarding to consumer for mode %d"), (int32)Mode);
-      (*Consumer)->ConsumeInput(JoyID, Held, Pressed, Released, Frame);
+      (*Consumer)->ConsumeInput(PlayerID, Held, Pressed, Released);
     } else {
       UE_LOG(InputLog, Warning, TEXT("FInputRouter::Route Consumer for mode %d is invalid"),
              (int32)Mode);
