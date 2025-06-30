@@ -10,6 +10,7 @@ Saved/
 # Personal docs
 ObsidianVault/
 !ObsidianVault/DevDocs/
+!ObsidianVault/Game Design/
 
 # Optional
 .vscode/
