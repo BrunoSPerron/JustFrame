@@ -1,5 +1,5 @@
 // Every Frame is a Choice //
-#include "UI/CharacterSelectScreen.h"
+#include "UI/Menu/Screens/CharacterSelectScreen.h"
 #include "Data/Structs/InputEnums.h"
 #include "Utilities/ExternalDataLoader.h"
 
@@ -143,5 +143,4 @@ void UCharacterSelectScreen::UpdateSelection(uint8 PlayerID) {
 
 void UCharacterSelectScreen::NativeTick(const FGeometry &MyGeometry, float InDeltaTime) {
   Super::NativeTick(MyGeometry, InDeltaTime);
-  TriggerInputs(this);
 }

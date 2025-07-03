@@ -8,9 +8,8 @@ Saved/
 *.code-workspace
 
 # Personal docs
-ObsidianVault/
-!ObsidianVault/DevDocs/
-!ObsidianVault/Game Design/
+ObsidianVault/.obsidian/
+ObsidianVault/Perso/
 
 # Optional
 .vscode/

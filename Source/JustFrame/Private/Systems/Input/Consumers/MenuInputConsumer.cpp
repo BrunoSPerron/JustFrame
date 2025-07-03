@@ -13,7 +13,9 @@ void FMenuInputConsumer::ConsumeInput(uint8 PlayerID, const TSet<SDL_GamepadButt
   for (const TPair<SDL_GamepadButton, uint16> &Pair : InputMap.SDLButtonToBitMask) {
     const SDL_GamepadButton Button = Pair.Key;
     const uint16 Bit = Pair.Value;
-    if (Pressed.Contains(Button)) InputMask |= Bit;
+    if (Pressed.Contains(Button)) {
+      InputMask |= Bit;
+    }
   }
 
   InputBufferManager->SetUnbufferedInput(PlayerID, InputMask);

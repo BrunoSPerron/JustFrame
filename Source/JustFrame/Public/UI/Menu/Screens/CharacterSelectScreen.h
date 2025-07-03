@@ -7,11 +7,12 @@
 #include "Components/UniformGridPanel.h"
 #include "Components/SizeBox.h"
 #include "Components/Image.h"
-#include "UI/Interfaces/IMenuInputCore.h"
+#include "UI/Menu/IMenuCore.h"
+#include "UI/Menu/MenuRegistration.h"
 #include "CharacterSelectScreen.generated.h"
 
 UCLASS()
-class UCharacterSelectScreen : public UUserWidget, public IMenuInputCore {
+class UCharacterSelectScreen : public UUserWidget, public IMenuCore {
   GENERATED_BODY()
 
 public:
@@ -43,3 +44,5 @@ private:
   void PopulateGrid();
   void UpdateSelection(uint8 PlayerID);
 };
+
+REGISTER_MENU_WIDGET(UCharacterSelectScreen, TEXT("CharacterSelect"));

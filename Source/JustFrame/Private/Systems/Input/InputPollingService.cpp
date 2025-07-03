@@ -76,31 +76,22 @@ void UInputPollingService::PollControllers() {
     HandleSDLEvent(Event);
   }
 
-  const TMap<SDL_JoystickID, uint8> JoystickToPlayer = PlayerSettingsManager->GetJoystickToPlayer();
-  for (const TPair<SDL_JoystickID, uint8> &Pair : JoystickToPlayer) {
-    SDL_JoystickID JoyID = Pair.Key;
-    uint8 PlayerID = Pair.Value;
+  if (InputRouter) {
+    const TMap<SDL_JoystickID, uint8> JoystickToPlayer =
+        PlayerSettingsManager->GetJoystickToPlayer();
+    for (const TPair<SDL_JoystickID, uint8> &Pair : JoystickToPlayer) {
+      SDL_JoystickID JoyID = Pair.Key;
+      uint8 PlayerID = Pair.Value;
 
-    const FInputMapping &Mapping = PlayerSettingsManager->GetInputMapping(PlayerID);
+      const TSet<SDL_GamepadButton> &Held = HeldAtFrameStart.FindRef(JoyID);
+      const TSet<SDL_GamepadButton> &Pressed = PressedThisFrame.FindRef(JoyID);
+      const TSet<SDL_GamepadButton> &Released = ReleasedThisFrame.FindRef(JoyID);
 
-    const TSet<SDL_GamepadButton> &Held = HeldAtFrameStart.FindRef(JoyID);
-    const TSet<SDL_GamepadButton> &Pressed = PressedThisFrame.FindRef(JoyID);
-    const TSet<SDL_GamepadButton> &Released = ReleasedThisFrame.FindRef(JoyID);
-
-    uint16 InputMask = 0;
-    for (const TPair<SDL_GamepadButton, uint16> &MapPair : Mapping.SDLButtonToBitMask) {
-      SDL_GamepadButton Button = MapPair.Key;
-      uint16 Bit = MapPair.Value;
-      const bool bHeld = Held.Contains(Button);
-      const bool bPressed = Pressed.Contains(Button);
-      const bool bReleased = Released.Contains(Button);
-      if (!(bHeld && bPressed) && ((bHeld && !bReleased) || bPressed)) {
-        InputMask |= Bit;
-      }
-      if (InputRouter) InputRouter->Route(PlayerID, Held, Pressed, Released);
+      InputRouter->Route(PlayerID, Held, Pressed, Released);
     }
-    PrepareNextFrame();
   }
+
+  PrepareNextFrame();
 }
 
 void UInputPollingService::HandleSDLEvent(const SDL_Event &Event) {

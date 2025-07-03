@@ -4,12 +4,6 @@
 
 void UPlayerSettingsManager::Init() {
   PlayerSettingsList.Empty();
-
-  for (uint8 PlayerID : GetActivePlayerIDs()) {
-    FPlayerSettings Settings;
-    Settings.InputMap = GetDefaultInputMapping();
-    PlayerSettingsList.Add(Settings);
-  }
 }
 
 FInputMapping UPlayerSettingsManager::GetDefaultInputMapping() const {

@@ -5,21 +5,25 @@
 #include "GameFramework/GameModeBase.h"
 #include "MainScreenGameMode.generated.h"
 
-class UCharacterSelectScreen;
 class UGameManagerSubsystem;
+class UMenuManagerComponent;
 
 UCLASS() class JUSTFRAME_API AMainScreenGameMode : public AGameModeBase {
   GENERATED_BODY()
 
+public:
+  AMainScreenGameMode();
+
 protected:
   virtual void BeginPlay() override;
+  virtual void Tick(float DeltaTime) override;
 
 private:
-  UPROPERTY()
-  UCharacterSelectScreen *CharacterSelectWidget = nullptr;
-
   UPROPERTY(EditDefaultsOnly, Category = "UI")
-  TSubclassOf<UCharacterSelectScreen> CharacterSelectWidgetClass;
+  TSubclassOf<class UCharacterSelectScreen> CharacterSelectWidgetClass;
+
+  UPROPERTY()
+  UMenuManagerComponent *MenuManager = nullptr;
 
   UGameManagerSubsystem *GameManagerSubsystem;
 };

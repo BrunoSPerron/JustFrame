@@ -59,7 +59,8 @@ uint16 UInputBufferManager::GetUnbufferedInput(uint8 PlayerID) const {
     return 0;
   }
   int32 NumPlayers = PlayerSettingsManager->GetNumPlayers();
-  return (PlayerID < NumPlayers && CurrentUnbufferedInputs.Num() > PlayerID)
-             ? CurrentUnbufferedInputs[PlayerID]
-             : 0;
+  uint16 InputMask = (PlayerID < NumPlayers && CurrentUnbufferedInputs.Num() > PlayerID)
+                         ? CurrentUnbufferedInputs[PlayerID]
+                         : 0;
+  return InputMask;
 }
